@@ -13,7 +13,7 @@ public class MainMenu
         users = new ArrayList<>();
     }
 
-    public void displayMainMenu()
+    public void displayLoginMenu()
     {
         System.out.println("Main Menu");
         while (true)
@@ -29,13 +29,58 @@ public class MainMenu
             {
                 case 1:
                     register();
-
+                    displayMainMenu();
                     break;
                 case 2:
-                    login();
+                    if (login())
+                    {
+                        displayMainMenu();
+                    }
+                    else
+                    {
+                        displayLoginMenu();
+                    }
                     break;
                 case 3:
                     System.out.println("3. Logout");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid option");
+                    break;
+            }
+        }
+    }
+
+    void displayMainMenu()
+    {
+        // TODO:
+        System.out.println("Main Menu");
+        while (true)
+        {
+            System.out.println("1. Write Movie Review");
+            System.out.println("2. Edit or Delete Review");
+            System.out.println("3. Find Movie Review");
+            System.out.println("4. Folow User");
+            System.out.println("5. Ask for Follow Suggestion");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+
+            int option = scanner.nextInt();
+            scanner.nextLine();
+            switch (option)
+            {
+                case 1:
+                    // TODO:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
                     System.exit(0);
                 default:
                     System.out.println("Invalid option");
@@ -71,7 +116,7 @@ public class MainMenu
         isLoggedIn = true;
     }
 
-    public void login()
+    public boolean login()
     {
         System.out.print("Enter email: ");
         String email = scanner.nextLine();
@@ -85,10 +130,12 @@ public class MainMenu
             currentUser = user;
             isLoggedIn = true;
             System.out.println("Login successful!");
+            return true;
         }
         else
         {
             System.out.println("Invalid email or password.");
+            return false;
         }
     }
 
