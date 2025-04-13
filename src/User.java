@@ -1,3 +1,4 @@
+import java.sql.*;
 import java.util.ArrayList;
 
 public class User
@@ -6,19 +7,14 @@ public class User
     private String username;
     private String email;
     private String password;
-    private ArrayList<String> favoriteGenres;
-    private ArrayList<User> following;
 
 
-    public User(int userID ,String username, String email, String password,
-                ArrayList<String> favoriteGenres, ArrayList<User> following)
+    public User(int userID ,String username, String email, String password)
     {
         this.userID = userID;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.favoriteGenres = favoriteGenres;
-        this.following = following;
     }
 
     public int getUserID()
@@ -61,19 +57,48 @@ public class User
         this.password = password;
     }
 
-    public ArrayList<String> getFavoriteGenres()
+    public void save()
     {
-        return favoriteGenres;
+        Connection conn = Database.getInstance().getConnection();
+        String query = "INSERT INTO users (userID, username, email, password) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setInt(1, this.userID);
+            statement.setString(2, this.username);
+            statement.setString(3, this.email);
+            statement.setString(4, this.password);
+            statement.executeUpdate();
+            System.out.println("User saved to database.");
+        } catch (SQLException e) {
+            System.err.println("User save failed: " + e.getMessage());
+        }
     }
 
-    public void setFavoriteGenres(ArrayList<String> favoriteGenres)
+    public static ArrayList<User> load()
     {
-        this.favoriteGenres = favoriteGenres;
-    }
+        ArrayList<User> users = new ArrayList<>();
+        Connection connection = Database.getInstance().getConnection();
+        String query = "SELECT * FROM users";
 
-    public ArrayList<User> getFollowing()
-    {
-        return following;
+        try (PreparedStatement statement = connection.prepareStatement(query))
+        {
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next())
+            {
+                users.add(new User(
+                        resultSet.getInt("userID"),
+                        resultSet.getString("username"),
+                        resultSet.getString("email"),
+                        resultSet.getString("password")
+                ));
+            }
+        }
+        catch (SQLException exception)
+        {
+            System.err.println("Failed to load users: " + exception.getMessage());
+        }
+
+        return users;
     }
 
 }

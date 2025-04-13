@@ -25,7 +25,7 @@ public class MainMenu
 
         if (!authManager.isUserLoggedIn())
         {
-            authManager.displayAuthMenu();
+            displayAuthMenu();
         }
 
         System.out.println("Main Menu");
@@ -57,13 +57,50 @@ public class MainMenu
                     break;
                 case 6:
                     authManager.logout();
-                    displayMainMenu();
                     return;
                 case 7:
                     System.exit(0);
                     break;
                 default:
                     System.out.println("Invalid option. Try again.");
+            }
+        }
+    }
+
+    public void displayAuthMenu()
+    {
+        Scanner scanner = new Scanner(System.in);
+        while (true)
+        {
+            System.out.println("Authentication Menu:");
+            System.out.println("1. Login");
+            System.out.println("2. Register");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+
+            int option = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (option)
+            {
+                case 1:
+                    System.out.print("Enter email: ");
+                    String email = scanner.nextLine();
+                    System.out.print("Enter password: ");
+                    String password = scanner.nextLine();
+                    if (authManager.login(email, password))
+                    {
+                        return;
+                    }
+                    break;
+                case 2:
+                    System.out.println("Registering new user...");
+                    break;
+                case 3:
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
             }
         }
     }
