@@ -8,9 +8,9 @@ public class Movie
 {
     private int movieID;
     private String title;
-    private String genre;
+    private Genre.GenreType genre;
 
-    public Movie(int movieID, String title, String genre)
+    public Movie(int movieID, String title, Genre.GenreType genre)
     {
         this.movieID = movieID;
         this.title = title;
@@ -37,14 +37,20 @@ public class Movie
         this.title = title;
     }
 
-    public String getGenre()
-    {
+    public Genre.GenreType getGenre() {
         return genre;
     }
 
-    public void setGenre(String genre)
+    public void setGenre(Genre.GenreType genre)
     {
         this.genre = genre;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Movie ID: " + movieID + ", Title: " + title + ", Genre: " + genre;
+    }
+
 
 }
