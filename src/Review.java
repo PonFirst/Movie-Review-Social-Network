@@ -22,5 +22,26 @@ public class Review
         this.likeCount = likeCount;
     }
 
+    public void editReview(String text, int rating)
+    {
+        this.text = text;
+        this.rating = rating;
+    }
+
+    public void deleteReview()
+    {
+        //TODO
+    }
+
+    public void likeReview()
+    {
+        this.likeCount++;
+    }
+
+    public int getLikeCount()
+    {
+        return likeCount;
+    }
+
 
 }

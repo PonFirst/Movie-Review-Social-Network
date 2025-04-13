@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class ReviewManager
@@ -19,5 +20,14 @@ public class ReviewManager
         return instance;
     }
 
+    public void addReviewMenu(int movieID)
+    {
+        System.out.println("Adding review menu");
+    }
+
+    public ArrayList findReviewsByMovie(String movieTitle)
+    {
+
+    }
 
 }
