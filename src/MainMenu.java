@@ -92,7 +92,10 @@ public class MainMenu
                     {
                         return;
                     }
-                    break;
+                    else 
+                    {
+                        System.out.println("Login failed. Please try again.");
+                    }
                 case 2:
                     System.out.println("Registering new user...");
                     break;

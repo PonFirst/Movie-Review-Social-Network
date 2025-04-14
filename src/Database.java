@@ -6,6 +6,7 @@ public class Database
     private Connection connection;
     private static String databaseURL = "jdbc:sqlite:app.db";
 
+    // Class constructor
     private Database()
     {
         connect();
@@ -33,6 +34,9 @@ public class Database
         }
     }
 
+
+
+    // Class public methods
     public Connection getConnection()
     {
         return connection;
