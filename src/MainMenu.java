@@ -96,6 +96,7 @@ public class MainMenu
                     {
                         System.out.println("Login failed. Please try again.");
                     }
+                    break;
                 case 2:
                     System.out.println("Registering new user...");
                     break;
