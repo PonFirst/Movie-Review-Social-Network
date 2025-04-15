@@ -64,11 +64,23 @@ public class AuthenticationManager
         
     }
 
-    public void register(User newUser)
+    public void register()
     {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        int userID = User.getNextUserID(); // get new ID
+        User newUser = new User(userID, username, email, password);
+        newUser.save();
+
+        System.out.println("Registration successful!");
         currentUser = newUser;
         loggedIn = true;
-        System.out.println("Registration successful!");
     }
 
     public void logout()

@@ -101,4 +101,24 @@ public class User
         return users;
     }
 
+    public static int getNextUserID()
+    {
+        Connection conn = Database.getInstance().getConnection();
+        String query = "SELECT MAX(userID) AS max_id FROM users";
+        try (PreparedStatement stmt = conn.prepareStatement(query))
+        {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next())
+            {
+                return rs.getInt("max_id") + 1;
+            }
+        }
+        catch (SQLException e)
+        {
+            System.err.println("Failed to get max user ID: " + e.getMessage());
+        }
+        return 1;
+    }
+
+
 }

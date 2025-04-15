@@ -98,7 +98,7 @@ public class MainMenu
                     }
                     break;
                 case 2:
-                    System.out.println("Registering new user...");
+                    authManager.register();
                     break;
                 case 3:
                     System.exit(0);
