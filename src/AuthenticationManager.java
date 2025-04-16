@@ -44,25 +44,37 @@ public class AuthenticationManager
 
     public boolean login(String email, String password)
     {
-        // ToDo
-
         String query = "SELECT * FROM users WHERE email = ? AND password = ?";
 
-        try {
+        try
+        {
             PreparedStatement preparedQuery = connection.prepareStatement(query);
             preparedQuery.setString(1, email);
             preparedQuery.setString(2, password);
             ResultSet resultSet = preparedQuery.executeQuery();
 
-            return resultSet.next();
+            if (resultSet.next())
+            {
+                currentUser = new User(
+                        resultSet.getInt("userID"),
+                        resultSet.getString("username"),
+                        email,
+                        password
+                );
+                loggedIn = true;
+                System.out.println("Login successful. Welcome, " + currentUser.getUserName() + "!");
+                return true;
+            }
 
-        } catch (SQLException e) {
-            System.err.println("Database error: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
-        
+        catch (SQLException e)
+        {
+            System.err.println("Database error: " + e.getMessage());
+            return false;
+        }
     }
+
 
     public void register()
     {

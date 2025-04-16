@@ -6,9 +6,10 @@ public class Main
     public static void main(String[] args)
     {
         MainMenu mainMenu = MainMenu.getInstance();
+        mainMenu.displayAuthMenu();
         while(true)
         {
-            mainMenu.displayAuthMenu();
+            mainMenu.displayMainMenu();
         }
     }
 }
