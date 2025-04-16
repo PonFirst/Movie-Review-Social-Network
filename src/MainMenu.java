@@ -27,6 +27,7 @@ public class MainMenu
         {
             displayAuthMenu();
         }
+        User currentUser = authManager.getCurrentUser();
 
         System.out.println("Main Menu");
         while (true)
@@ -46,6 +47,7 @@ public class MainMenu
             switch (option)
             {
                 case 1:
+                    ReviewManager.getInstance().addReviewMenu(currentUser);
                     break;
                 case 2:
                     break;

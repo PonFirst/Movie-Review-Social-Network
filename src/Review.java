@@ -1,4 +1,5 @@
 import java.util.Date;
+import java.sql.*;
 
 public class Review
 {
@@ -43,5 +44,36 @@ public class Review
         return likeCount;
     }
 
+    public Movie getMovie()
+    {
+        return movie;
+    }
+
+    public void save() {
+        Connection conn = Database.getInstance().getConnection();
+        if (conn == null) {
+            System.err.println("Review save failed: database connection is null");
+            return;
+        }
+
+        String query = "INSERT INTO reviews (movieID, userID, content, rating, reviewDate, likeCount) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = conn.prepareStatement(query))
+        {
+            statement.setInt(1, this.movie.getMovieID());
+            statement.setInt(2, this.user.getUserID());
+            statement.setString(3, this.text);
+            statement.setInt(4, this.rating);
+            statement.setDate(5, new java.sql.Date(this.reviewDate.getTime()));
+            statement.setInt(6, this.likeCount);
+
+            // Execute the update
+            statement.executeUpdate();
+            System.out.println("Review saved to database.");
+        } catch (SQLException e) {
+            System.err.println("Review save failed: " + e.getMessage());
+        }
+    }
 
 }
