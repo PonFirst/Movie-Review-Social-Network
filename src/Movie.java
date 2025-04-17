@@ -52,5 +52,4 @@ public class Movie
         return "Movie ID: " + movieID + ", Title: " + title + ", Genre: " + genre;
     }
 
-
 }
