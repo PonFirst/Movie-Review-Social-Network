@@ -50,21 +50,20 @@ public class SearchReview {
         try (Connection conn = Database.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            // Use prepared statement to avoid SQL injection
             stmt.setString(1, "%" + movieTitle + "%");
 
             try (ResultSet rs = stmt.executeQuery()) {
                 boolean foundReviews = false;
                 while (rs.next()) {
                     int reviewID = rs.getInt("reviewID");
-                    String content = rs.getString("content");  // Updated to match the column name
+                    String content = rs.getString("content");
                     int rating = rs.getInt("rating");
                     Date reviewDate = rs.getDate("reviewDate");
                     int likeCount = rs.getInt("likeCount");
                     String movie = rs.getString("title");
 
                     // Create a Review object and add it to the list
-                    Review review = new Review(content, rating, null, null, reviewDate, reviewID, likeCount); // Pass null for user and movie for now
+                    Review review = new Review(content, rating, null, null, reviewDate, reviewID, likeCount);
                     reviews.add(review);
 
                     foundReviews = true;

@@ -6,7 +6,6 @@ public class Database
     private Connection connection;
     private static final String DATABASE_URL = "jdbc:sqlite:app.db";
 
-    // Class constructor
     private Database()
     {
         connect();
@@ -36,6 +35,15 @@ public class Database
     // Class public methods
     public Connection getConnection()
     {
+        try {
+            // Check if connection is null or closed, and reconnect if necessary
+            if (connection == null || connection.isClosed())
+            {
+                connect();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking connection status: " + e.getMessage());
+        }
         return connection;
     }
 

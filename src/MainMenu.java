@@ -61,6 +61,7 @@ public class MainMenu
                     authManager.logout();
                     return;
                 case 7:
+                    Database.getInstance().disconnect();
                     System.exit(0);
                     break;
                 default:
@@ -103,6 +104,7 @@ public class MainMenu
                     authManager.register();
                     break;
                 case 3:
+                    Database.getInstance().disconnect();
                     System.exit(0);
                     break;
                 default:

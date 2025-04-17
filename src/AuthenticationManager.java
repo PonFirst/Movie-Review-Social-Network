@@ -55,12 +55,36 @@ public class AuthenticationManager
 
             if (resultSet.next())
             {
+                ArrayList<Genre.GenreType> favoriteGenres = new ArrayList<>();
+                int userID = resultSet.getInt("userID");
+
+                // Fetch genres from UserGenres
+                String genreQuery = "SELECT genre FROM UserGenres WHERE userID = ?";
+                PreparedStatement genreStmt = connection.prepareStatement(genreQuery);
+                genreStmt.setInt(1, userID);
+                ResultSet genreResults = genreStmt.executeQuery();
+
+                while (genreResults.next())
+                {
+                    String genreName = genreResults.getString("genre");
+                    try
+                    {
+                        favoriteGenres.add(Genre.GenreType.valueOf(genreName.trim()));
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        System.err.println("Invalid genre in UserGenres: " + genreName);
+                    }
+                }
+
                 currentUser = new User(
-                        resultSet.getInt("userID"),
+                        userID,
                         resultSet.getString("username"),
                         email,
-                        password
+                        password,
+                        favoriteGenres
                 );
+
                 loggedIn = true;
                 System.out.println("Login successful. Welcome, " + currentUser.getUserName() + "!");
                 return true;
@@ -76,8 +100,9 @@ public class AuthenticationManager
     }
 
 
-    public void register()
-    {
+
+
+    public void register() {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
@@ -85,9 +110,24 @@ public class AuthenticationManager
         String email = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
+        System.out.print("Enter favorite genres (Comma Separated): ");
+        String genresInput = scanner.nextLine();
+
+        ArrayList<Genre.GenreType> favoriteGenres = new ArrayList<>();
+        String[] genreStrings = genresInput.split(",");
+
+        for (String genreStr : genreStrings) {
+            try {
+                String formatted = genreStr.trim().toUpperCase().replace(' ', '_');
+                Genre.GenreType genreType = Genre.GenreType.valueOf(formatted);
+                favoriteGenres.add(genreType);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid genre: " + genreStr.trim());
+            }
+        }
 
         int userID = User.getNextUserID(); // get new ID
-        User newUser = new User(userID, username, email, password);
+        User newUser = new User(userID, username, email, password, favoriteGenres);
         newUser.save();
 
         System.out.println("Registration successful!");
