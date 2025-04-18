@@ -23,12 +23,14 @@ public class Review {
         this.likeCount = likeCount;
     }
 
-    public void editReview(String text, int rating) {
+    public void editReview(String text, int rating)
+    {
         this.text = text;
         this.rating = rating;
     }
 
-    public void deleteReview() {
+    public void deleteReview()
+    {
         // TODO: implement delete logic
     }
 
