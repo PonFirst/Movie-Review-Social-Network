@@ -49,10 +49,10 @@ public class MainMenu
             switch (option)
             {
                 case 1:
-                    ReviewManager.getInstance().addReviewMenu(currentUser);
+                    ReviewManager.getInstance().addReviewMenu(currentUser.getUserID());
                     break;
                 case 2:
-                    break;
+                    ReviewManager.getInstance().editReviewMenu(currentUser.getUserName());
                 case 3:
                     break;
                 case 4:
@@ -121,7 +121,7 @@ public class MainMenu
     private void searchReviewMenu(Scanner scanner)
     {
         while (true) {
-            System.out.println("\nSearch Reviews By:");
+            System.out.println("Search Reviews By:");
             System.out.println("1. Movie Title");
             System.out.println("2. Genre");
             System.out.println("3. Review Date");
@@ -129,21 +129,30 @@ public class MainMenu
             System.out.println("5. Go Back");
             System.out.print("Enter your choice: ");
 
-            int choice = Integer.parseInt(scanner.nextLine());
+            int choice = -1;
+            try
+            {
+                choice = Integer.parseInt(scanner.nextLine()); // Parse the user's input
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+                continue; // Skip to the next iteration of the loop
+            }
 
-            switch (choice) {
+            switch (choice)
+            {
                 case 1:
                     System.out.print("Enter Movie Title: ");
                     String movieTitle = scanner.nextLine();
-
                     ArrayList<Review> reviews = SearchReview.findReviewsByMovie(movieTitle);
 
-                    if (reviews.isEmpty()) {
+                    if (reviews.isEmpty())
+                    {
                         System.out.println("No reviews found for movies matching: " + movieTitle);
-                    } else {
+                    }
+                    else
+                    {
                         System.out.println("Reviews for: " + movieTitle);
-                        for (Review review : reviews)
-                        {
+                        for (Review review : reviews) {
                             System.out.println(review);
                         }
                     }
@@ -173,5 +182,6 @@ public class MainMenu
             }
         }
     }
+
 
 }

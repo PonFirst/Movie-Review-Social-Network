@@ -22,7 +22,7 @@ public class ReviewManager
         return instance;
     }
 
-    public void addReviewMenu(User user)
+    public void addReviewMenu(int userID)
     {
         Scanner scanner = new Scanner(System.in);
 
@@ -72,7 +72,7 @@ public class ReviewManager
 
         System.out.print("Confirm submission? (y/n): ");
         if (scanner.nextLine().equalsIgnoreCase("y")) {
-            Review review = new Review(0, reviewText, rating, user.getUserID(),
+            Review review = new Review(0, reviewText, rating, userID,
                     selectedMovie.getMovieID(), new Date(), 0);
             review.save();
             System.out.println("Review published successfully.");
@@ -82,5 +82,80 @@ public class ReviewManager
     }
 
 
+    public void editReviewMenu(String username)
+    {
+        Scanner scanner = new Scanner(System.in);
+
+        // Get reviews by username
+        ArrayList<Review> userReviews = SearchReview.findReviewsByUsername(username);
+
+        if (userReviews.isEmpty()) {
+            System.out.println("No reviews found for user: " + username);
+            return;
+        }
+
+        System.out.println("Reviews for " + username + ":");
+        for (Review review : userReviews) {
+            String textSnippet = review.getText().length() > 50 ? review.getText().substring(0, 50) + "..." : review.getText();
+
+            System.out.println("Review ID: " + review.getReviewID());
+            System.out.println("Movie: " + Movie.getMovieTitleByID(review.getMovieID()));
+            System.out.println("Rating: " + review.getRating());
+            System.out.println("Text: " + textSnippet);
+            System.out.println("--------------------");
+        }
+
+        System.out.print("Enter the Review ID to edit: ");
+        int reviewID = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        Review selectedReview = null;
+        for (Review review : userReviews) {
+            if (review.getReviewID() == reviewID) {
+                selectedReview = review;
+                break;
+            }
+        }
+
+        if (selectedReview == null) {
+            System.out.println("Invalid Review ID.");
+            return;
+        }
+
+        System.out.println("Current Review:");
+        System.out.println(selectedReview);
+
+        System.out.print("Enter new rating (1-5): ");
+        int newRating = scanner.nextInt();
+        scanner.nextLine();
+
+        while (newRating < 1 || newRating > 5) {
+            System.out.println("Invalid rating value. Please enter a rating between 1 and 5.");
+            System.out.print("Enter new rating (1-5): ");
+            newRating = scanner.nextInt();
+            scanner.nextLine();
+        }
+
+        System.out.println("Enter new review text (or leave blank to keep current):");
+        String newText = scanner.nextLine();
+
+        selectedReview.setRating(newRating);
+
+        if (!newText.isEmpty())
+        {
+            selectedReview.setText(newText);
+        }
+
+
+        System.out.print("Confirm changes? (y/n): ");
+        if (scanner.nextLine().equalsIgnoreCase("y"))
+        {
+            selectedReview.update();
+        }
+        else
+        {
+            System.out.println("Edit canceled.");
+        }
+    }
 
 }

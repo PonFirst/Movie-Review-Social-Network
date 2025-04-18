@@ -99,9 +99,6 @@ public class AuthenticationManager
         }
     }
 
-
-
-
     public void register() {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter username: ");

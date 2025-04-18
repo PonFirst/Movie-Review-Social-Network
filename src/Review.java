@@ -23,6 +23,37 @@ public class Review {
         this.likeCount = likeCount;
     }
 
+    public int getReviewID()
+    {
+        return reviewID;
+    }
+
+    public String getText()
+    {
+        return text;
+    }
+
+    public void setText(String text)
+    {
+        this.text = text;
+    }
+
+    public int getRating()
+    {
+        return rating;
+    }
+
+    public void setRating(int rating)
+    {
+        this.rating = rating;
+    }
+
+    public int getMovieID()
+    {
+        return movieID;
+    }
+
+
     public void editReview(String text, int rating)
     {
         this.text = text;
@@ -66,6 +97,32 @@ public class Review {
             System.err.println("Review save failed: " + e.getMessage());
         }
     }
+
+    public void update() {
+        Connection conn = Database.getInstance().getConnection();
+        if (conn == null) {
+            System.err.println("Review update failed: database connection is null");
+            return;
+        }
+
+        String query = "UPDATE reviews SET content = ?, rating = ? WHERE reviewID = ?";
+
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setString(1, this.text);
+            statement.setInt(2, this.rating);
+            statement.setInt(3, this.reviewID);
+
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Review updated successfully.");
+            } else {
+                System.err.println("Review update failed: review ID not found.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Review update failed: " + e.getMessage());
+        }
+    }
+
 
     public static ArrayList<Review> load() {
         ArrayList<Review> reviews = new ArrayList<>();
