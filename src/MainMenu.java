@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class MainMenu
@@ -52,7 +53,21 @@ public class MainMenu
                 case 2:
                     break;
                 case 3:
+                    System.out.print("Enter Movie Title: ");
+                    String movieTitle = scanner.nextLine();
+
+                    ArrayList<Review> reviews = SearchReview.getInstance().findReviewsByMovie(movieTitle);
+
+                    if (reviews.isEmpty()) {
+                        System.out.println("No reviews found for movies matching: " + movieTitle);
+                    } else {
+                        System.out.println("Reviews for: " + movieTitle);
+                        for (Review review : reviews) {
+                            System.out.println(review);
+                        }
+                    }
                     break;
+
                 case 4:
                     break;
                 case 5:

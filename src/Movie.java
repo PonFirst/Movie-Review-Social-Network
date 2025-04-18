@@ -52,4 +52,26 @@ public class Movie
         return "Movie ID: " + movieID + ", Title: " + title + ", Genre: " + genre;
     }
 
+    public static String getMovieTitleByID(int movieID)
+    {
+        String title = "Unknown";
+        String sql = "SELECT title FROM Movies WHERE id = ?";
+
+        try (Connection conn = Database.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, movieID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    title = rs.getString("title");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching movie title: " + e.getMessage());
+        }
+
+        return title;  // Return the title or "Unknown" if not found
+    }
+
 }

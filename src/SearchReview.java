@@ -44,41 +44,42 @@ public class SearchReview {
 
     public ArrayList<Review> findReviewsByMovie(String movieTitle) {
         ArrayList<Review> reviews = new ArrayList<>();
-        String sql = "SELECT r.reviewID, r.content, r.rating, r.reviewDate, r.likeCount, m.title " +
-                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE m.title LIKE ?";
+        String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
+                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE LOWER(m.title) LIKE LOWER(?)"; // Normalize both sides
 
         try (Connection conn = Database.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, "%" + movieTitle + "%");
+            // Normalize user input to match with the movie titles in the database
+            stmt.setString(1, "%" + movieTitle.trim().toLowerCase() + "%");
 
             try (ResultSet rs = stmt.executeQuery()) {
-                boolean foundReviews = false;
                 while (rs.next()) {
                     int reviewID = rs.getInt("reviewID");
                     String content = rs.getString("content");
                     int rating = rs.getInt("rating");
+                    int userID = rs.getInt("userID");
+                    int movieID = rs.getInt("movieID");
                     Date reviewDate = rs.getDate("reviewDate");
                     int likeCount = rs.getInt("likeCount");
-                    String movie = rs.getString("title");
 
-                    // Create a Review object and add it to the list
-                    Review review = new Review(content, rating, null, null, reviewDate, reviewID, likeCount);
+                    Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
                     reviews.add(review);
+                }
 
-                    foundReviews = true;
+                if (reviews.isEmpty()) {
+                    System.out.println("No reviews found for movies matching: " + movieTitle);
                 }
-                if (!foundReviews) {
-                    System.out.println("No reviews found for the movie titled: " + movieTitle);
-                }
+
             }
-
         } catch (SQLException e) {
             System.err.println("Error finding reviews by movie: " + e.getMessage());
         }
 
-        return reviews; // Return the list of reviews
+        return reviews;
     }
+
+
 
 
 }

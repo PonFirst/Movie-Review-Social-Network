@@ -97,7 +97,8 @@ public class User
 
 
 
-    public static ArrayList<User> load() {
+    public static ArrayList<User> load()
+    {
         ArrayList<User> users = new ArrayList<>();
         Connection connection = Database.getInstance().getConnection();
         String query = "SELECT * FROM users";
@@ -106,7 +107,8 @@ public class User
         {
             ResultSet resultSet = statement.executeQuery();
 
-            while (resultSet.next()) {
+            while (resultSet.next())
+            {
                 int userID = resultSet.getInt("userID");
                 String username = resultSet.getString("username");
                 String email = resultSet.getString("email");
@@ -134,7 +136,9 @@ public class User
 
                 users.add(new User(userID, username, email, password, genres));
             }
-        } catch (SQLException exception) {
+        }
+        catch (SQLException exception)
+        {
             System.err.println("Failed to load users: " + exception.getMessage());
         }
 
@@ -148,10 +152,10 @@ public class User
         String query = "SELECT MAX(userID) AS max_id FROM users";
         try (PreparedStatement stmt = conn.prepareStatement(query))
         {
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next())
+            ResultSet result = stmt.executeQuery();
+            if (result.next())
             {
-                return rs.getInt("max_id") + 1;
+                return result.getInt("max_id") + 1;
             }
         }
         catch (SQLException e)

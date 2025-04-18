@@ -20,14 +20,19 @@ public class Database
         return instance;
     }
 
-    private void connect() {
-        try {
+    private void connect()
+    {
+        try
+        {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(DATABASE_URL);
-            System.out.println("Connected to the database.");
-        } catch (ClassNotFoundException e) {
-            System.err.println("SQLite JDBC driver not found. Check if the driver JAR is in the classpath.");
-        } catch (SQLException e) {
+        }
+        catch (ClassNotFoundException e)
+        {
+            System.err.println("SQLite JDBC driver not found.");
+        }
+        catch (SQLException e)
+        {
             System.err.println("Failed to connect to the database: " + e.getMessage());
         }
     }
@@ -35,7 +40,8 @@ public class Database
     // Class public methods
     public Connection getConnection()
     {
-        try {
+        try
+        {
             // Check if connection is null or closed, and reconnect if necessary
             if (connection == null || connection.isClosed())
             {

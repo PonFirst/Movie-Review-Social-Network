@@ -72,7 +72,8 @@ public class ReviewManager
 
         System.out.print("Confirm submission? (y/n): ");
         if (scanner.nextLine().equalsIgnoreCase("y")) {
-            Review review = new Review(reviewText, rating, user, selectedMovie, new Date(), 0, 0);
+            Review review = new Review(0, reviewText, rating, user.getUserID(),
+                    selectedMovie.getMovieID(), new Date(), 0);
             review.save();
             System.out.println("Review published successfully.");
         } else {
