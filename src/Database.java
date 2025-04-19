@@ -60,6 +60,7 @@ public class Database
             if (connection != null && !connection.isClosed())
             {
                 connection.close();
+                connection = null;
                 System.out.println("Disconnected from database");
             }
         }

@@ -53,7 +53,9 @@ public class MainMenu
                     break;
                 case 2:
                     ReviewManager.getInstance().editReviewMenu(currentUser.getUserName());
+                    break;
                 case 3:
+                    ReviewManager.getInstance().deleteReviewMenu(currentUser.getUserName());
                     break;
                 case 4:
                     searchReviewMenu(scanner);

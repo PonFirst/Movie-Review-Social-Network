@@ -158,4 +158,62 @@ public class ReviewManager
         }
     }
 
+    public void deleteReviewMenu(String username)
+    {
+        Scanner scanner = new Scanner(System.in);
+
+        ArrayList<Review> userReviews = SearchReview.findReviewsByUsername(username);
+
+        if (userReviews.isEmpty()) {
+            System.out.println("You have no reviews to delete.");
+            return;
+        }
+
+        System.out.println("Your Reviews:");
+        for (Review review : userReviews) {
+            String textSnippet = review.getText().length() > 50 ? review.getText().substring(0, 50) + "..." : review.getText();
+
+            System.out.println("Review ID: " + review.getReviewID());
+            System.out.println("Movie: " + Movie.getMovieTitleByID(review.getMovieID()));
+            System.out.println("Rating: " + review.getRating());
+            System.out.println("Text: " + textSnippet);
+            System.out.println("--------------------");
+        }
+
+        System.out.print("Enter the Review ID to delete (or type 0 to cancel): ");
+        int reviewID = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        if (reviewID == 0) {
+            System.out.println("Deletion canceled. Returning to main menu.");
+            return;
+        }
+
+        Review selectedReview = null;
+        for (Review review : userReviews) {
+            if (review.getReviewID() == reviewID) {
+                selectedReview = review;
+                break;
+            }
+        }
+
+        if (selectedReview == null) {
+            System.out.println("Invalid Review ID.");
+            return;
+        }
+
+        System.out.println("Selected Review:");
+        System.out.println(selectedReview);
+
+        System.out.print("Are you sure you want to delete this review? (y/n): ");
+        String confirm = scanner.nextLine();
+
+        if (confirm.equalsIgnoreCase("y")) {
+            selectedReview.deleteReview();
+            System.out.println("Review deleted successfully.");
+        } else {
+            System.out.println("Deletion canceled.");
+        }
+    }
+
 }

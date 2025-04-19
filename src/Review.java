@@ -62,8 +62,27 @@ public class Review {
 
     public void deleteReview()
     {
-        // TODO: implement delete logic
+        Connection conn = Database.getInstance().getConnection();
+        if (conn == null) {
+            System.err.println("Review delete failed: database connection is null");
+            return;
+        }
+
+        String query = "DELETE FROM reviews WHERE reviewID = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, this.reviewID);
+            int rowsDeleted = stmt.executeUpdate();
+            if (rowsDeleted > 0) {
+                System.out.println("Review successfully deleted from database.");
+            } else {
+                System.err.println("No review found with the specified ID.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Review delete failed: " + e.getMessage());
+        }
     }
+
 
     public void likeReview() {
         this.likeCount++;

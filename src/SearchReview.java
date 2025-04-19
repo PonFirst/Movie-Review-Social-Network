@@ -104,10 +104,6 @@ public class SearchReview {
                     reviews.add(review);
                 }
 
-                if (reviews.isEmpty()) {
-                    System.out.println("No reviews found for user: " + username);
-                }
-
             }
         } catch (SQLException e) {
             System.err.println("Error finding reviews by username: " + e.getMessage());

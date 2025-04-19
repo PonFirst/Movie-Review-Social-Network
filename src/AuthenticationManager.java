@@ -17,7 +17,6 @@ public class AuthenticationManager
     private User currentUser;
     private boolean loggedIn = false;
     private Database database = Database.getInstance();
-    private Connection connection = database.getConnection();
 
     private AuthenticationManager()
     {
@@ -46,9 +45,9 @@ public class AuthenticationManager
     {
         String query = "SELECT * FROM users WHERE email = ? AND password = ?";
 
-        try
+        try (Connection conn = Database.getInstance().getConnection();
+             PreparedStatement preparedQuery = conn.prepareStatement(query))
         {
-            PreparedStatement preparedQuery = connection.prepareStatement(query);
             preparedQuery.setString(1, email);
             preparedQuery.setString(2, password);
             ResultSet resultSet = preparedQuery.executeQuery();
@@ -60,7 +59,7 @@ public class AuthenticationManager
 
                 // Fetch genres from UserGenres
                 String genreQuery = "SELECT genre FROM UserGenres WHERE userID = ?";
-                PreparedStatement genreStmt = connection.prepareStatement(genreQuery);
+                PreparedStatement genreStmt = conn.prepareStatement(genreQuery);
                 genreStmt.setInt(1, userID);
                 ResultSet genreResults = genreStmt.executeQuery();
 
