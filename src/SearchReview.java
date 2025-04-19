@@ -66,11 +66,6 @@ public class SearchReview {
                     Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
                     reviews.add(review);
                 }
-
-                if (reviews.isEmpty()) {
-                    System.out.println("No reviews found for movies matching: " + movieTitle);
-                }
-
             }
         } catch (SQLException e) {
             System.err.println("Error finding reviews by movie: " + e.getMessage());
@@ -111,6 +106,53 @@ public class SearchReview {
 
         return reviews;
     }
+
+    public static ArrayList<Review> findReviewsByGenre(String genreInput) {
+        ArrayList<Review> reviews = new ArrayList<>();
+
+        // Validate genre
+        Genre.GenreType genreType;
+        try {
+            genreType = Genre.GenreType.valueOf(genreInput.trim().toUpperCase().replace(' ', '_'));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid movie genre: " + genreInput);
+            return null;
+        }
+
+        String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
+                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE m.genres LIKE ?";
+
+        try (Connection conn = Database.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Use wildcards to allow genre to be part of a list, e.g., 'ADVENTURE, FANTASY'
+            stmt.setString(1, "%" + genreType.toString() + "%");
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int reviewID = rs.getInt("reviewID");
+                    String content = rs.getString("content");
+                    int rating = rs.getInt("rating");
+                    int userID = rs.getInt("userID");
+                    int movieID = rs.getInt("movieID");
+                    Date reviewDate = rs.getDate("reviewDate");
+                    int likeCount = rs.getInt("likeCount");
+
+                    Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
+                    reviews.add(review);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding reviews by genre: " + e.getMessage());
+        }
+
+        return reviews;
+    }
+
+
+
+
+
 
 
 }

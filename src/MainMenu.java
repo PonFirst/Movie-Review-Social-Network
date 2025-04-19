@@ -122,7 +122,8 @@ public class MainMenu
 
     private void searchReviewMenu(Scanner scanner)
     {
-        while (true) {
+        while (true)
+        {
             System.out.println("Search Reviews By:");
             System.out.println("1. Movie Title");
             System.out.println("2. Genre");
@@ -143,47 +144,91 @@ public class MainMenu
             switch (choice)
             {
                 case 1:
-                    System.out.print("Enter Movie Title: ");
-                    String movieTitle = scanner.nextLine();
-                    ArrayList<Review> reviews = SearchReview.findReviewsByMovie(movieTitle);
+                    while (true) {
+                        System.out.print("Enter Movie Title: ");
+                        String movieTitle = scanner.nextLine();
 
-                    if (reviews.isEmpty())
-                    {
-                        System.out.println("No reviews found for movies matching: " + movieTitle);
-                    }
-                    else
-                    {
-                        System.out.println("Reviews for: " + movieTitle);
-                        for (Review review : reviews) {
-                            System.out.println(review);
+                        ArrayList<Review> reviews = SearchReview.findReviewsByMovie(movieTitle);
+
+                        if (reviews.isEmpty()) {
+                            System.out.println("No reviews found for movies matching: " + movieTitle);
+                        } else {
+                            System.out.println("Reviews for: " + movieTitle);
+                            for (Review review : reviews) {
+                                System.out.println(review);
+                            }
                         }
+
+                        System.out.print("Do you want to search another movie? (y/n): ");
+                        String again = scanner.nextLine();
+                        if (!again.equalsIgnoreCase("y")) break;
                     }
                     break;
                 case 2:
-                    System.out.print("Enter Genre: ");
-                    String genre = scanner.nextLine();
-                    // Call search by genre method
+                    while (true) {
+                        System.out.print("Enter Genre: ");
+                        String genre = scanner.nextLine();
+
+                        ArrayList<Review> reviews = SearchReview.findReviewsByGenre(genre);
+
+                        if (reviews == null)
+                        {
+                            System.out.print("Do you want to try another genre? (y/n): ");
+                            String again = scanner.nextLine();
+                            if (!again.equalsIgnoreCase("y")) break;
+                            continue;
+                        }
+
+                        if (reviews.isEmpty())
+                        {
+                            System.out.println("No reviews found for genre: " + genre);
+                        } else {
+                            System.out.println("Reviews in Genre: " + genre);
+                            for (Review review : reviews) {
+                                System.out.println(review);
+                            }
+                        }
+
+                        System.out.print("Do you want to search another genre? (y/n): ");
+                        String again = scanner.nextLine();
+                        if (!again.equalsIgnoreCase("y")) break;
+                    }
                     break;
+
                 case 3:
                     System.out.print("Enter Review Date (YYYY-MM-DD): ");
                     String date = scanner.nextLine();
-                    // Call search by date method
+                    // To be implemented later
                     break;
                 case 4:
-                    System.out.print("Enter Username: ");
-                    String username = scanner.nextLine();
-                    reviews = SearchReview.findReviewsByUsername(username);
-                    for (Review review : reviews) {
-                        System.out.println(review);
+                    while (true) {
+                        System.out.print("Enter Username: ");
+                        String username = scanner.nextLine();
+
+                        ArrayList<Review> reviews = SearchReview.findReviewsByUsername(username);
+                        if (reviews.isEmpty()) {
+                            System.out.println("No reviews found for user: " + username);
+                        } else {
+                            System.out.println("Reviews by user: " + username);
+                            for (Review review : reviews) {
+                                System.out.println(review);
+                            }
+                        }
+
+                        System.out.print("Do you want to search another user? (y/n): ");
+                        String again = scanner.nextLine();
+                        if (!again.equalsIgnoreCase("y")) break;
                     }
                     break;
+
                 case 5:
-                    return; // Go back to main menu
+                    return;
                 default:
                     System.out.println("Invalid choice. Try again.");
             }
         }
     }
+
 
 
 }
