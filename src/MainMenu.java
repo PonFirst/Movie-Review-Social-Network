@@ -160,6 +160,12 @@ public class MainMenu
                             for (Review review : reviews) {
                                 System.out.println(review);
                             }
+                            System.out.print("Like any review? (y/n): ");
+                            String likeChoice = scanner.nextLine();
+                            if (likeChoice.equalsIgnoreCase("y"))
+                            {
+                                ReviewManager.getInstance().likeReviewMenu();
+                            }
                         }
 
                         System.out.print("Do you want to search another movie? (y/n): ");
@@ -189,6 +195,12 @@ public class MainMenu
                             System.out.println("Reviews in Genre: " + genre);
                             for (Review review : reviews) {
                                 System.out.println(review);
+                            }
+                            System.out.print("Like any review? (y/n): ");
+                            String likeChoice = scanner.nextLine();
+                            if (likeChoice.equalsIgnoreCase("y"))
+                            {
+                                ReviewManager.getInstance().likeReviewMenu();
                             }
                         }
 
@@ -224,6 +236,12 @@ public class MainMenu
                             for (Review review : reviewsInRange) {
                                 System.out.println(review);
                             }
+                            System.out.print("Like any review? (y/n): ");
+                            String likeChoice = scanner.nextLine();
+                            if (likeChoice.equalsIgnoreCase("y"))
+                            {
+                                ReviewManager.getInstance().likeReviewMenu();
+                            }
                         }
 
                         // Ask if user wants to continue
@@ -248,6 +266,12 @@ public class MainMenu
                             System.out.println("Reviews by user: " + username);
                             for (Review review : reviews) {
                                 System.out.println(review);
+                            }
+                            System.out.print("Like any review? (y/n): ");
+                            String likeChoice = scanner.nextLine();
+                            if (likeChoice.equalsIgnoreCase("y"))
+                            {
+                                ReviewManager.getInstance().likeReviewMenu();
                             }
                         }
 

@@ -3,7 +3,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.sql.*;
 
-public class Review {
+public class Review
+{
     private int reviewID;
     private String text;
     private int rating;
@@ -84,9 +85,55 @@ public class Review {
     }
 
 
-    public void likeReview() {
-        this.likeCount++;
+    public void likeReview()
+    {
+        Connection conn = Database.getInstance().getConnection();
+        if (conn == null) {
+            System.err.println("Database connection failed.");
+            return;
+        }
+
+        // Retrieve the current user through AuthenticationManager
+        AuthenticationManager authManager = AuthenticationManager.getInstance();
+        int currentUserID = authManager.getCurrentUser().getUserID();
+
+        String checkLikeQuery = "SELECT * FROM Likes WHERE reviewID = ? AND userID = ?";
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkLikeQuery)) {
+            checkStmt.setInt(1, this.reviewID);
+            checkStmt.setInt(2, currentUserID);
+            ResultSet resultSet = checkStmt.executeQuery();
+
+            if (resultSet.next()) {
+                System.out.println("You have already liked this review.");
+                return;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking if review is already liked: " + e.getMessage());
+            return;
+        }
+
+        String insertLikeQuery = "INSERT INTO Likes (reviewID, userID) VALUES (?, ?)";
+        try (PreparedStatement insertStmt = conn.prepareStatement(insertLikeQuery)) {
+            insertStmt.setInt(1, this.reviewID);
+            insertStmt.setInt(2, currentUserID);
+            int rowsAffected = insertStmt.executeUpdate();
+            if (rowsAffected > 0) {
+                String updateLikeCountQuery = "UPDATE Reviews SET likeCount = likeCount + 1 WHERE reviewID = ?";
+                try (PreparedStatement updateStmt = conn.prepareStatement(updateLikeCountQuery)) {
+                    updateStmt.setInt(1, this.reviewID);
+                    updateStmt.executeUpdate();
+                }
+
+                System.out.println("Liked review ID: " + this.reviewID);
+            } else {
+                System.err.println("Failed to insert like.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error liking review: " + e.getMessage());
+        }
     }
+
+
 
     public int getLikeCount() {
         return likeCount;
@@ -167,6 +214,35 @@ public class Review {
         }
 
         return reviews;
+    }
+
+    public static Review getReviewByID(int reviewID)
+    {
+        Connection conn = Database.getInstance().getConnection();
+        if (conn == null) {
+            System.err.println("Failed to fetch review: database connection is null");
+            return null;
+        }
+
+        String query = "SELECT * FROM reviews WHERE reviewID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, reviewID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Review(
+                        rs.getInt("reviewID"),
+                        rs.getString("content"),
+                        rs.getInt("rating"),
+                        rs.getInt("userID"),
+                        rs.getInt("movieID"),
+                        rs.getDate("reviewDate"),
+                        rs.getInt("likeCount")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching review: " + e.getMessage());
+        }
+        return null;
     }
 
     @Override

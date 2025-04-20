@@ -216,4 +216,26 @@ public class ReviewManager
         }
     }
 
+    public void likeReviewMenu()
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Review ID to like: ");
+        int reviewID = -1;
+        try {
+            reviewID = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid review ID format.");
+            return;
+        }
+
+        Review review = Review.getReviewByID(reviewID);
+        if (review == null) {
+            System.out.println("Review not found.");
+            return;
+        }
+
+        review.likeReview();
+    }
+
+
 }
