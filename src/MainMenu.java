@@ -1,4 +1,7 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
 public class MainMenu
@@ -196,10 +199,43 @@ public class MainMenu
                     break;
 
                 case 3:
-                    System.out.print("Enter Review Date (YYYY-MM-DD): ");
-                    String date = scanner.nextLine();
-                    // To be implemented later
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    dateFormat.setLenient(false);
+
+                    while (true) {
+                        Date startDate = readValidDate("Enter Start Review Date (YYYY-MM-DD): ", scanner, dateFormat);
+                        Date endDate = readValidDate("Enter End Review Date (YYYY-MM-DD): ", scanner, dateFormat);
+
+                        // Validate date range
+                        if (startDate.after(endDate)) {
+                            System.out.println("Start date must be before or equal to end date. Try again.");
+                            continue;
+                        }
+
+                        // Search and display reviews
+                        ArrayList<Review> reviewsInRange = SearchReview.findReviewsByDateRange(startDate, endDate);
+                        String startStr = dateFormat.format(startDate);
+                        String endStr = dateFormat.format(endDate);
+
+                        if (reviewsInRange.isEmpty()) {
+                            System.out.println("No reviews found between " + startStr + " and " + endStr + ".");
+                        } else {
+                            System.out.println("Reviews from " + startStr + " to " + endStr + ":");
+                            for (Review review : reviewsInRange) {
+                                System.out.println(review);
+                            }
+                        }
+
+                        // Ask if user wants to continue
+                        System.out.print("Do you want to search another date range? (y/n): ");
+                        String continueSearch = scanner.nextLine().trim();
+                        if (!continueSearch.equalsIgnoreCase("y")) break;
+                    }
+
+                    System.out.println("Returning to main menu...");
                     break;
+
+
                 case 4:
                     while (true) {
                         System.out.print("Enter Username: ");
@@ -229,6 +265,27 @@ public class MainMenu
         }
     }
 
+    private static Date readValidDate(String prompt, Scanner scanner, SimpleDateFormat dateFormat)
+    {
+        while (true)
+        {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            if (!input.matches("\\d{4}-\\d{2}-\\d{2}"))
+            {
+                System.out.println("Invalid format. Please enter the date in YYYY-MM-DD format.");
+                continue;
+            }
+
+            try
+            {
+                return dateFormat.parse(input);
+            } catch (ParseException e) {
+                System.out.println("Invalid date. Please enter a valid date.");
+            }
+        }
+    }
 
 
 }

@@ -1,3 +1,4 @@
+import java.util.Date;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -144,6 +145,42 @@ public class SearchReview {
             }
         } catch (SQLException e) {
             System.err.println("Error finding reviews by genre: " + e.getMessage());
+        }
+
+        return reviews;
+    }
+
+    public static ArrayList<Review> findReviewsByDateRange(Date startDate, Date endDate)
+    {
+        ArrayList<Review> reviews = new ArrayList<>();
+        String sql = "SELECT * FROM reviews WHERE reviewDate BETWEEN ? AND ?";
+
+        Timestamp startTimestamp = new Timestamp(startDate.getTime());
+        Timestamp endTimestamp = new Timestamp(endDate.getTime() + (24 * 60 * 60 * 1000) - 1);
+
+        try (Connection conn = Database.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setTimestamp(1, startTimestamp);
+            stmt.setTimestamp(2, endTimestamp);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int reviewID = rs.getInt("reviewID");
+                    String content = rs.getString("content");
+                    int rating = rs.getInt("rating");
+                    int userID = rs.getInt("userID");
+                    int movieID = rs.getInt("movieID");
+                    Date reviewDate = rs.getTimestamp("reviewDate");
+                    int likeCount = rs.getInt("likeCount");
+
+                    Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
+                    reviews.add(review);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error finding reviews by date range: " + e.getMessage());
         }
 
         return reviews;
