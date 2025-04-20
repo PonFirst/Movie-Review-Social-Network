@@ -10,15 +10,15 @@ A social network platform focused on movie reviews, allowing users to share, exp
 
 ### Unix-like Systems (Linux/macOS)
 #### Compiling
-cd src
-javac -cp ".:sqlite-jdbc-3.49.1.0.jar" *.java
+- cd src
+- javac -cp ".:sqlite-jdbc-3.49.1.0.jar" *.java
 #### Running
-java -cp ".:sqlite-jdbc-3.49.1.0.jar" Main
+- java -cp ".:sqlite-jdbc-3.49.1.0.jar" Main
 
 
 ### Windows Systems
 #### Compiling
-cd src
-javac -cp ".;sqlite-jdbc-3.49.1.0.jar" *.java
+- cd src
+- javac -cp ".;sqlite-jdbc-3.49.1.0.jar" *.java
 #### Running
-java -cp ".;sqlite-jdbc-3.49.1.0.jar" Main
+- java -cp ".;sqlite-jdbc-3.49.1.0.jar" Main
