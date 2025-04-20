@@ -1,17 +1,24 @@
 # Movie-Review-Social-Network
 
-# How to compile and run
-Open the terminal inside the src directory of the project
+## Project Description
+A social network platform focused on movie reviews, allowing users to share, explore, and interact with movie reviews.
 
-Compiling on Unix systems
+## Prerequisites
+- Java Development Kit (JDK) 8 or higher
+
+## Compilation and Execution
+
+### Unix-like Systems (Linux/macOS)
+#### Compiling
+cd src
 javac -cp ".:sqlite-jdbc-3.49.1.0.jar" *.java
-
-Running on Unix systems
+#### Running
 java -cp ".:sqlite-jdbc-3.49.1.0.jar" Main
 
 
-Compiling on Windows systems
+### Windows Systems
+#### Compiling
+cd src
 javac -cp ".;sqlite-jdbc-3.49.1.0.jar" *.java
-
-Running on Windows systems
+#### Running
 java -cp ".;sqlite-jdbc-3.49.1.0.jar" Main
