@@ -44,10 +44,8 @@ public class MainMenu
             System.out.println("6. Ask for Follow Suggestion");
             System.out.println("7. Logout");
             System.out.println("8. Exit");
-            System.out.print("Enter your choice: ");
 
-            int option = scanner.nextInt();
-            scanner.nextLine();
+            int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
 
             switch (option)
             {
@@ -91,8 +89,7 @@ public class MainMenu
             System.out.println("3. Exit");
             System.out.print("Enter your choice: ");
 
-            int option = scanner.nextInt();
-            scanner.nextLine();
+            int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
 
             switch (option)
             {
@@ -135,14 +132,7 @@ public class MainMenu
             System.out.println("5. Go Back");
             System.out.print("Enter your choice: ");
 
-            int choice = -1;
-            try
-            {
-                choice = Integer.parseInt(scanner.nextLine()); // Parse the user's input
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-                continue; // Skip to the next iteration of the loop
-            }
+            int choice = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
 
             switch (choice)
             {
@@ -160,9 +150,8 @@ public class MainMenu
                             for (Review review : reviews) {
                                 System.out.println(review);
                             }
-                            System.out.print("Like any review? (y/n): ");
-                            String likeChoice = scanner.nextLine();
-                            if (likeChoice.equalsIgnoreCase("y"))
+                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
+                            if (likeChoice)
                             {
                                 ReviewManager.getInstance().likeReviewMenu();
                             }
@@ -196,9 +185,8 @@ public class MainMenu
                             for (Review review : reviews) {
                                 System.out.println(review);
                             }
-                            System.out.print("Like any review? (y/n): ");
-                            String likeChoice = scanner.nextLine();
-                            if (likeChoice.equalsIgnoreCase("y"))
+                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
+                            if (likeChoice)
                             {
                                 ReviewManager.getInstance().likeReviewMenu();
                             }
@@ -215,8 +203,8 @@ public class MainMenu
                     dateFormat.setLenient(false);
 
                     while (true) {
-                        Date startDate = readValidDate("Enter Start Review Date (YYYY-MM-DD): ", scanner, dateFormat);
-                        Date endDate = readValidDate("Enter End Review Date (YYYY-MM-DD): ", scanner, dateFormat);
+                        Date startDate = InputValidator.readValidDate("Enter Start Review Date (YYYY-MM-DD): ", scanner, dateFormat);
+                        Date endDate = InputValidator.readValidDate("Enter End Review Date (YYYY-MM-DD): ", scanner, dateFormat);
 
                         // Validate date range
                         if (startDate.after(endDate)) {
@@ -236,9 +224,8 @@ public class MainMenu
                             for (Review review : reviewsInRange) {
                                 System.out.println(review);
                             }
-                            System.out.print("Like any review? (y/n): ");
-                            String likeChoice = scanner.nextLine();
-                            if (likeChoice.equalsIgnoreCase("y"))
+                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
+                            if (likeChoice)
                             {
                                 ReviewManager.getInstance().likeReviewMenu();
                             }
@@ -267,9 +254,8 @@ public class MainMenu
                             for (Review review : reviews) {
                                 System.out.println(review);
                             }
-                            System.out.print("Like any review? (y/n): ");
-                            String likeChoice = scanner.nextLine();
-                            if (likeChoice.equalsIgnoreCase("y"))
+                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
+                            if (likeChoice)
                             {
                                 ReviewManager.getInstance().likeReviewMenu();
                             }
@@ -285,28 +271,6 @@ public class MainMenu
                     return;
                 default:
                     System.out.println("Invalid choice. Try again.");
-            }
-        }
-    }
-
-    private static Date readValidDate(String prompt, Scanner scanner, SimpleDateFormat dateFormat)
-    {
-        while (true)
-        {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-
-            if (!input.matches("\\d{4}-\\d{2}-\\d{2}"))
-            {
-                System.out.println("Invalid format. Please enter the date in YYYY-MM-DD format.");
-                continue;
-            }
-
-            try
-            {
-                return dateFormat.parse(input);
-            } catch (ParseException e) {
-                System.out.println("Invalid date. Please enter a valid date.");
             }
         }
     }
