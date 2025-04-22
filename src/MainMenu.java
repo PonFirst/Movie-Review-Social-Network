@@ -87,7 +87,6 @@ public class MainMenu
             System.out.println("1. Login");
             System.out.println("2. Register");
             System.out.println("3. Exit");
-            System.out.print("Enter your choice: ");
 
             int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
 
@@ -130,7 +129,6 @@ public class MainMenu
             System.out.println("3. Review Date");
             System.out.println("4. User");
             System.out.println("5. Go Back");
-            System.out.print("Enter your choice: ");
 
             int choice = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
 

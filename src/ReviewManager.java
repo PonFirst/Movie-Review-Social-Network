@@ -38,7 +38,7 @@ public class ReviewManager
 
         System.out.println("Matching Movies:");
         for (Movie m : matchedMovies) {
-            System.out.println("Movie ID: " + m.getMovieID() + ", Title: " + m.getMovieTitle() + ", Genre: " + m.getGenre());
+            System.out.println(m.toString());
         }
 
         Movie selectedMovie = null;

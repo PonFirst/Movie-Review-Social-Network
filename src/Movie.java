@@ -10,6 +10,7 @@ public class Movie
     private String title;
     private Genre.GenreType genre;
 
+
     public Movie(int movieID, String title, Genre.GenreType genre)
     {
         this.movieID = movieID;
@@ -46,10 +47,27 @@ public class Movie
         this.genre = genre;
     }
 
+    public double getAverageRating()
+    {
+        String sql = "SELECT AVG(rating) AS averageRating FROM reviews WHERE movieID = ?";
+        try (Connection conn = Database.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, this.movieID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("averageRating");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error calculating average rating: " + e.getMessage());
+        }
+        return 0.0;
+    }
+
     @Override
     public String toString()
     {
-        return "Movie ID: " + movieID + ", Title: " + title + ", Genre: " + genre;
+        return "Movie ID: " + movieID + ", Title: " + title + ", Genre: " + genre + ", Average Rating: " + getAverageRating();
     }
 
     public static String getMovieTitleByID(int movieID)
