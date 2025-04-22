@@ -97,7 +97,7 @@ public class Graph {
         }
 
         // Print the social network structure for debugging
-        System.out.println(printSocialNetworkStructure());
+        System.out.println(this.toString());
     }
     
     /**
@@ -362,7 +362,8 @@ public class Graph {
      * 
      * @return a formatted string showing all users with their followers and following
      */
-    public String printSocialNetworkStructure() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Social Network Graph:\n");
         
