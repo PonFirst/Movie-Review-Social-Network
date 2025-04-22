@@ -7,6 +7,8 @@ public class Main
     {
         MainMenu mainMenu = MainMenu.getInstance();
         mainMenu.displayAuthMenu();
+        // Load users from database into the graph structure
+        Graph.getInstance();
         while(true)
         {
             mainMenu.displayMainMenu();

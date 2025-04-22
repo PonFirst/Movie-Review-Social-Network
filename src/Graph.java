@@ -1,7 +1,9 @@
 import java.util.*;
+import java.sql.*;
 
 /**
  * A social network graph implementation using HashMaps to store user relationships.
+ * Optimized for follower/following relationships between users.
  * 
  * @param <T> Type of user vertices stored in the graph
  */
@@ -17,12 +19,121 @@ public class Graph<T> {
     private final Map<Object, T> userIndex;
     
     /**
-     * Private constructor for Singleton pattern
+     * Private constructor for Singleton pattern.
+     * Initializes the graph and loads user relationships from the database.
      */
     private Graph() {
         this.followers = new HashMap<>();
         this.following = new HashMap<>();
         this.userIndex = new HashMap<>();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        
+        try {
+            // Get database connection
+            connection = Database.getInstance().getConnection();
+            
+            // First, load all users from the Users table
+            statement = connection.prepareStatement(
+                "SELECT userID, username, email FROM Users"
+            );
+            resultSet = statement.executeQuery();
+            
+            // Assuming T is a User class with these fields
+            while (resultSet.next()) {
+                int userId = resultSet.getInt("userID");
+                String username = resultSet.getString("username");
+                String email = resultSet.getString("email");
+                
+                // Create user object with additional query to load genres
+                T user = createUserObject(userId, username, email);
+                
+                // Add user to graph
+                addUser(user);
+                
+                // Index user by ID and username for quick lookups
+                indexUser(userId, user);
+                indexUser(username, user);
+            }
+            
+            // Close resources
+            resultSet.close();
+            statement.close();
+            
+            // Now load all follower relationships from UserFollower table
+            statement = connection.prepareStatement(
+                "SELECT uf.userID, uf.followerID " +
+                "FROM UserFollower uf"
+            );
+            resultSet = statement.executeQuery();
+            
+            // Add each follower relationship
+            while (resultSet.next()) {
+                int userId = resultSet.getInt("userID");
+                int followerId = resultSet.getInt("followerID");
+                
+                // Get user objects from our index
+                T user = getUserByKey(userId);
+                T follower = getUserByKey(followerId);
+                
+                if (user != null && follower != null) {
+                    // Add the follower relationship (follower follows user)
+                    addFollower(follower, user);
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error loading social graph from database: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Close resources in reverse order
+            try {
+                if (resultSet != null) resultSet.close();
+                if (statement != null) statement.close();
+                // Note: We typically don't close the connection here as it may be reused
+            } catch (SQLException e) {
+                System.err.println("Error closing database resources: " + e.getMessage());
+            }
+        }
+
+        // Print the social network structure for debugging
+        System.out.println(printSocialNetworkStructure());
+    }
+    
+    /**
+     * Helper method to create a user object from database fields.
+     * Creates a new User object with the data from the database.
+     */
+    @SuppressWarnings("unchecked")
+    private T createUserObject(int userId, String username, String email) {
+        // Load genres for this user
+        ArrayList<Genre.GenreType> genres = new ArrayList<>();
+        try {
+            Connection connection = Database.getInstance().getConnection();
+            String genreQuery = "SELECT genre FROM UserGenres WHERE userID = ?";
+            try (PreparedStatement genreStatement = connection.prepareStatement(genreQuery)) {
+                genreStatement.setInt(1, userId);
+                ResultSet genreResultSet = genreStatement.executeQuery();
+                while (genreResultSet.next()) {
+                    try {
+                        genres.add(Genre.GenreType.valueOf(genreResultSet.getString("genre")));
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Invalid genre in database for user " + userId);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading genres for user " + userId + ": " + e.getMessage());
+        }
+        
+        // Create a new User object with the provided data
+        // Note: We're setting password to null since we don't load it from the database in this context
+        User user = new User(userId, username, email, null, genres);
+        
+        // Cast it to type T and return
+        return (T) user;
     }
     
     /**
@@ -186,6 +297,7 @@ public class Graph<T> {
     /**
      * Gets a list of users who are followed by users that the specified user follows,
      * but who are not directly followed by the specified user.
+     * These are essentially "friends of friends" who have no direct connection.
      * 
      * @param user the user for whom to find potential connections
      * @return a list of users who are followed by user's following but not by user directly
@@ -252,25 +364,49 @@ public class Graph<T> {
     }
     
     /**
-     * DEBUGGING METHOD - Prints a representation of the social network.
+     * DEBUGGING METHOD - Prints a human-readable representation of the social network.
+     * This method is for development/debugging visualization only and not needed for
+     * core functionality.
      * 
      * @return a formatted string showing all users with their followers and following
      */
-    /*
-    @Override
-    public String printSocialNetworkStructure() {
+
+     public String printSocialNetworkStructure() {
         StringBuilder sb = new StringBuilder();
         sb.append("Social Network Graph:\n");
         
         for (Map.Entry<T, List<T>> entry : followers.entrySet()) {
             T user = entry.getKey();
-            sb.append(user.toString()).append(":\n");
-            sb.append("  Followers: ").append(entry.getValue().toString()).append("\n");
-            sb.append("  Following: ").append(following.get(user).toString()).append("\n");
+            // Print username instead of toString()
+            sb.append("User '").append(((User)user).getUserName()).append("' (ID: ")
+              .append(((User)user).getUserID()).append("):\n");
+            
+            // Use getFollowers method instead of direct map access
+            List<T> followersList = getFollowers(user);
+            sb.append("  Followers: [");
+            for (int i = 0; i < followersList.size(); i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                sb.append(((User)followersList.get(i)).getUserName());
+            }
+            sb.append("]\n");
+            
+            // Use getFollowing method for consistency
+            List<T> followingList = getFollowing(user);
+            sb.append("  Following: [");
+            for (int i = 0; i < followingList.size(); i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                sb.append(((User)followingList.get(i)).getUserName());
+            }
+            sb.append("]\n");
         }
         
         return sb.toString();
     }
-    */
+
+    
 
 }
