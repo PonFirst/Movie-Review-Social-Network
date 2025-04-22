@@ -139,11 +139,30 @@ public class Review
         return likeCount;
     }
 
-    public void save() {
+    public static boolean userHasReviewedMovie(int userID, int movieID)
+    {
+        try (Connection conn = Database.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT COUNT(*) FROM Reviews WHERE userID = ? AND movieID = ?")) {
+            stmt.setInt(1, userID);
+            stmt.setInt(2, movieID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    public boolean save()
+    {
         Connection conn = Database.getInstance().getConnection();
         if (conn == null) {
             System.err.println("Review save failed: database connection is null");
-            return;
+            return false;
         }
 
         String query = "INSERT INTO reviews (movieID, userID, content, rating, reviewDate, likeCount) " +
@@ -157,10 +176,17 @@ public class Review
             statement.setDate(5, new java.sql.Date(this.reviewDate.getTime()));
             statement.setInt(6, this.likeCount);
 
-            statement.executeUpdate();
-            System.out.println("Review saved to database.");
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Review saved to database.");
+                return true;
+            } else {
+                System.err.println("Review save failed: no rows affected.");
+                return false;
+            }
         } catch (SQLException e) {
             System.err.println("Review save failed: " + e.getMessage());
+            return false;
         }
     }
 

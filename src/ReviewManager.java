@@ -22,8 +22,7 @@ public class ReviewManager
         return instance;
     }
 
-    public void addReviewMenu(int userID)
-    {
+    public void addReviewMenu(int userID) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter Movie Title (or part of it): ");
@@ -63,6 +62,12 @@ public class ReviewManager
             }
         }
 
+        // Check if user already reviewed this movie
+        if (Review.userHasReviewedMovie(userID, selectedMovie.getMovieID())) {
+            System.out.println("You have already published a review for this movie.");
+            return;
+        }
+
         System.out.print("Enter rating (1-5): ");
         int rating = scanner.nextInt();
         scanner.nextLine();
@@ -74,12 +79,18 @@ public class ReviewManager
         if (scanner.nextLine().equalsIgnoreCase("y")) {
             Review review = new Review(0, reviewText, rating, userID,
                     selectedMovie.getMovieID(), new Date(), 0);
-            review.save();
-            System.out.println("Review published successfully.");
+            if (review.save()) {
+                System.out.println("Review published successfully.");
+            } else {
+                System.out.println("Failed to publish review.");
+            }
         } else {
             System.out.println("Review canceled.");
         }
     }
+
+
+
 
 
     public void editReviewMenu(String username)
