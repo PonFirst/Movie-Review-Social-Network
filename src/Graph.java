@@ -4,19 +4,17 @@ import java.sql.*;
 /**
  * A social network graph implementation using HashMaps to store user relationships.
  * Optimized for follower/following relationships between users.
- * 
- * @param <T> Type of user vertices stored in the graph
  */
-public class Graph<T> {
+public class Graph {
     // Singleton instance
     private static Graph instance = null;
     
     // Maps each user to their followers
-    private final Map<T, List<T>> followers;
+    private final Map<User, List<User>> followers;
     // Maps each user to users they are following
-    private final Map<T, List<T>> following;
+    private final Map<User, List<User>> following;
     // Secondary index for faster user lookups
-    private final Map<Object, T> userIndex;
+    private final Map<Object, User> userIndex;
     
     /**
      * Private constructor for Singleton pattern.
@@ -41,14 +39,14 @@ public class Graph<T> {
             );
             resultSet = statement.executeQuery();
             
-            // Assuming T is a User class with these fields
+            // Create and load users
             while (resultSet.next()) {
                 int userId = resultSet.getInt("userID");
                 String username = resultSet.getString("username");
                 String email = resultSet.getString("email");
                 
                 // Create user object with additional query to load genres
-                T user = createUserObject(userId, username, email);
+                User user = createUserObject(userId, username, email);
                 
                 // Add user to graph
                 addUser(user);
@@ -75,8 +73,8 @@ public class Graph<T> {
                 int followerId = resultSet.getInt("followerID");
                 
                 // Get user objects from our index
-                T user = getUserByKey(userId);
-                T follower = getUserByKey(followerId);
+                User user = getUserByKey(userId);
+                User follower = getUserByKey(followerId);
                 
                 if (user != null && follower != null) {
                     // Add the follower relationship (follower follows user)
@@ -106,8 +104,7 @@ public class Graph<T> {
      * Helper method to create a user object from database fields.
      * Creates a new User object with the data from the database.
      */
-    @SuppressWarnings("unchecked")
-    private T createUserObject(int userId, String username, String email) {
+    private User createUserObject(int userId, String username, String email) {
         // Load genres for this user
         ArrayList<Genre.GenreType> genres = new ArrayList<>();
         try {
@@ -129,25 +126,20 @@ public class Graph<T> {
         }
         
         // Create a new User object with the provided data
-        // Note: We're setting password to null since we don't load it from the database in this context
-        User user = new User(userId, username, email, null, genres);
-        
-        // Cast it to type T and return
-        return (T) user;
+        // Note: We're setting password to null since we don't load it from the database
+        return new User(userId, username, email, null, genres);
     }
     
     /**
      * Gets the singleton instance of the graph
      * 
-     * @param <E> Type of user vertices stored in the graph
      * @return the singleton instance
      */
-    @SuppressWarnings("unchecked")
-    public static <E> Graph<E> getInstance() {
+    public static Graph getInstance() {
         if (instance == null) {
-            instance = new Graph<E>();
+            instance = new Graph();
         }
-        return (Graph<E>) instance;
+        return instance;
     }
     
     /**
@@ -155,7 +147,7 @@ public class Graph<T> {
      * 
      * @param user the user to add
      */
-    public void addUser(T user) {
+    public void addUser(User user) {
         followers.putIfAbsent(user, new ArrayList<>());
         following.putIfAbsent(user, new ArrayList<>());
     }
@@ -166,7 +158,7 @@ public class Graph<T> {
      * @param follower the user who is following
      * @param target the user being followed
      */
-    public void addFollower(T follower, T target) {
+    public void addFollower(User follower, User target) {
         // Add users if they don't exist
         addUser(follower);
         addUser(target);
@@ -182,7 +174,7 @@ public class Graph<T> {
      * @param follower the user who is following
      * @param target the user being followed
      */
-    public void removeFollower(T follower, T target) {
+    public void removeFollower(User follower, User target) {
         if (followers.containsKey(target)) {
             followers.get(target).remove(follower);
         }
@@ -197,14 +189,14 @@ public class Graph<T> {
      * 
      * @param user the user to remove
      */
-    public void removeUser(T user) {
+    public void removeUser(User user) {
         // Remove user from all following lists
-        for (List<T> userFollowers : followers.values()) {
+        for (List<User> userFollowers : followers.values()) {
             userFollowers.remove(user);
         }
         
         // Remove user from all follower lists
-        for (List<T> userFollowing : following.values()) {
+        for (List<User> userFollowing : following.values()) {
             userFollowing.remove(user);
         }
         
@@ -223,7 +215,7 @@ public class Graph<T> {
      * @param key the key to index by (e.g., user ID)
      * @param user the user to index
      */
-    public void indexUser(Object key, T user) {
+    public void indexUser(Object key, User user) {
         if (followers.containsKey(user)) {
             userIndex.put(key, user);
         }
@@ -235,7 +227,7 @@ public class Graph<T> {
      * @param key the key to look up (e.g., user ID)
      * @return the user if found, null otherwise
      */
-    public T getUserByKey(Object key) {
+    public User getUserByKey(Object key) {
         return userIndex.get(key);
     }
     
@@ -245,7 +237,7 @@ public class Graph<T> {
      * @param user the user to retrieve
      * @return the user object if found, null otherwise
      */
-    public T getUser(T user) {
+    public User getUser(User user) {
         if (followers.containsKey(user)) {
             return user;
         }
@@ -258,7 +250,7 @@ public class Graph<T> {
      * @param user the user to check
      * @return true if the user exists, false otherwise
      */
-    public boolean hasUser(T user) {
+    public boolean hasUser(User user) {
         return followers.containsKey(user);
     }
     
@@ -268,7 +260,7 @@ public class Graph<T> {
      * @param user the user
      * @return a list of all followers
      */
-    public List<T> getFollowers(T user) {
+    public List<User> getFollowers(User user) {
         return followers.getOrDefault(user, new ArrayList<>());
     }
     
@@ -278,7 +270,7 @@ public class Graph<T> {
      * @param user the user
      * @return a list of all users being followed
      */
-    public List<T> getFollowing(T user) {
+    public List<User> getFollowing(User user) {
         return following.getOrDefault(user, new ArrayList<>());
     }
     
@@ -289,7 +281,7 @@ public class Graph<T> {
      * @param target the potential target
      * @return true if follower is following target, false otherwise
      */
-    public boolean isFollowing(T follower, T target) {
+    public boolean isFollowing(User follower, User target) {
         return following.containsKey(follower) && 
                following.get(follower).contains(target);
     }
@@ -302,22 +294,22 @@ public class Graph<T> {
      * @param user the user for whom to find potential connections
      * @return a list of users who are followed by user's following but not by user directly
      */
-    public List<T> getFriendsOfFriendsNotConnected(T user) {
+    public List<User> getFriendsOfFriendsNotConnected(User user) {
         if (!following.containsKey(user)) {
             return new ArrayList<>();
         }
         
         // Get all users that the specified user is following
-        List<T> userFollowing = following.get(user);
+        List<User> userFollowing = following.get(user);
         
         // Create a set for faster lookup
-        Set<T> result = new HashSet<>();
+        Set<User> result = new HashSet<>();
         
         // For each user the specified user follows
-        for (T friend : userFollowing) {
+        for (User friend : userFollowing) {
             if (following.containsKey(friend)) {
                 // Get the users that this friend follows
-                List<T> friendFollowing = following.get(friend);
+                List<User> friendFollowing = following.get(friend);
                 
                 // Add all the friend's following to our result set
                 result.addAll(friendFollowing);
@@ -339,7 +331,7 @@ public class Graph<T> {
      * 
      * @return a set of all users
      */
-    public Set<T> getAllUsers() {
+    public Set<User> getAllUsers() {
         return followers.keySet();
     }
     
@@ -349,7 +341,7 @@ public class Graph<T> {
      * @param user the user
      * @return the number of followers
      */
-    public int getFollowerCount(T user) {
+    public int getFollowerCount(User user) {
         return followers.getOrDefault(user, Collections.emptyList()).size();
     }
     
@@ -359,7 +351,7 @@ public class Graph<T> {
      * @param user the user
      * @return the number of users being followed
      */
-    public int getFollowingCount(T user) {
+    public int getFollowingCount(User user) {
         return following.getOrDefault(user, Collections.emptyList()).size();
     }
     
@@ -370,43 +362,39 @@ public class Graph<T> {
      * 
      * @return a formatted string showing all users with their followers and following
      */
-
-     public String printSocialNetworkStructure() {
+    public String printSocialNetworkStructure() {
         StringBuilder sb = new StringBuilder();
         sb.append("Social Network Graph:\n");
         
-        for (Map.Entry<T, List<T>> entry : followers.entrySet()) {
-            T user = entry.getKey();
+        for (Map.Entry<User, List<User>> entry : followers.entrySet()) {
+            User user = entry.getKey();
             // Print username instead of toString()
-            sb.append("User '").append(((User)user).getUserName()).append("' (ID: ")
-              .append(((User)user).getUserID()).append("):\n");
+            sb.append("User '").append(user.getUserName()).append("' (ID: ")
+              .append(user.getUserID()).append("):\n");
             
             // Use getFollowers method instead of direct map access
-            List<T> followersList = getFollowers(user);
+            List<User> followersList = getFollowers(user);
             sb.append("  Followers: [");
             for (int i = 0; i < followersList.size(); i++) {
                 if (i > 0) {
                     sb.append(", ");
                 }
-                sb.append(((User)followersList.get(i)).getUserName());
+                sb.append(followersList.get(i).getUserName());
             }
             sb.append("]\n");
             
             // Use getFollowing method for consistency
-            List<T> followingList = getFollowing(user);
+            List<User> followingList = getFollowing(user);
             sb.append("  Following: [");
             for (int i = 0; i < followingList.size(); i++) {
                 if (i > 0) {
                     sb.append(", ");
                 }
-                sb.append(((User)followingList.get(i)).getUserName());
+                sb.append(followingList.get(i).getUserName());
             }
             sb.append("]\n");
         }
         
         return sb.toString();
     }
-
-    
-
 }
