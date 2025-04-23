@@ -33,17 +33,18 @@ public class MainMenu
         }
         User currentUser = authManager.getCurrentUser();
 
-        System.out.println("Main Menu");
         while (true)
         {
+            System.out.println();
             System.out.println("1. Write Movie Review");
             System.out.println("2. Edit Review");
             System.out.println("3. Delete Review");
             System.out.println("4. Find Movie Review");
             System.out.println("5. Follow User");
-            System.out.println("6. Ask for Follow Suggestion");
-            System.out.println("7. Logout");
-            System.out.println("8. Exit");
+            System.out.println("6. Unfollow User");
+            System.out.println("7. Ask for Follow Suggestion");
+            System.out.println("8. Logout");
+            System.out.println("9. Exit");
 
             int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
 
@@ -62,15 +63,25 @@ public class MainMenu
                     searchReviewMenu(scanner);
                     break;
                 case 5:
+                    UserGraphManager.getInstance().followUser();
                     break;
                 case 6:
+                    UserGraphManager.getInstance().unfollowUser();
                     break;
                 case 7:
-                    authManager.logout();
+
                     return;
                 case 8:
+                    authManager.logout();
+                    break;
+                case 9:
                     Database.getInstance().disconnect();
+                    Graph.getInstance().disconnect();;
                     System.exit(0);
+                    break;
+                case 10:
+                    Graph graph = Graph.getInstance();
+                    System.out.println(graph); // Automatically calls the toString() method
                     break;
                 default:
                     System.out.println("Invalid option. Try again.");

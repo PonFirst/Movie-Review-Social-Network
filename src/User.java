@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class User
 {
@@ -82,6 +83,19 @@ public class User
         }
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return getUserID() == user.getUserID();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUserID());
+    }
 
 
     public void save() {
@@ -180,5 +194,84 @@ public class User
         return 1;
     }
 
+
+
+
+    private void printLatestReviews(User targetUser) {
+        Connection conn = Database.getInstance().getConnection();
+
+        
+        // Query for latest reviews
+        String query = "SELECT " +
+        "r.reviewID, " +
+        "r.movieID, " +
+        "r.content, " +
+        "r.rating, " +
+        "r.reviewDate, " +
+        "r.likeCount, " +
+        "m.title " +
+        "FROM Reviews r " +
+        "JOIN Movies m ON r.movieID = m.id " +
+        "WHERE r.userID = ? " +
+        "ORDER BY r.reviewDate DESC " +
+        "LIMIT 3";
+    
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setInt(1, targetUser.getUserID());
+            ResultSet resultSet = statement.executeQuery();
+            
+            System.out.println("\nLatest Reviews:");
+            
+            boolean hasReviews = false;
+            while (resultSet.next()) {
+                hasReviews = true;
+                
+                int reviewId = resultSet.getInt("reviewID");
+                int movieID = resultSet.getInt("movieID");
+                String text = resultSet.getString("content");
+                int rating = resultSet.getInt("rating");
+                Date reviewDate = resultSet.getDate("reviewDate");
+                int likeCount = resultSet.getInt("likeCount");
+                String movieTitle = resultSet.getString("title");
+                
+                // Truncate text to first 50 characters
+                String truncatedText = text.length() > 50 
+                    ? text.substring(0, 50) + "..." 
+                    : text;
+                
+                // Print review details
+                System.out.println("---");
+                System.out.println("Movie: " + movieTitle);
+                System.out.println("Rating: " + rating);
+                System.out.println("Review Date: " + reviewDate);
+                System.out.println("Likes: " + likeCount);
+                System.out.println("Review: " + truncatedText);
+            }
+            
+            if (!hasReviews) {
+                System.out.println("No reviews yet.");
+            }
+            
+        } catch (SQLException e) {
+            // Handle any SQL exceptions
+            System.err.println("Error retrieving reviews: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+    public void displayProfile() {
+        // Print user profile information
+        // Print username and favourite genres
+        System.out.println("Username: " + this.getUserName());
+        System.out.print("Favorite Genres: ");
+        for (Genre.GenreType genre : this.getFavoriteGenres()) {
+            System.out.print(genre + " ");
+        }
+        System.out.println(); // New line after genres
+        
+        // Call printLatestReviews with the current user instance
+        printLatestReviews(this);
+    }
 
 }

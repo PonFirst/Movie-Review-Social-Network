@@ -41,7 +41,7 @@ public class Graph {
             
             // Create and load users
             while (resultSet.next()) {
-                int userId = resultSet.getInt("userID");
+                int userId = resultSet.getInt("userID"); 
                 String username = resultSet.getString("username");
                 String email = resultSet.getString("email");
                 
@@ -147,7 +147,7 @@ public class Graph {
      * 
      * @param user the user to add
      */
-    public void addUser(User user) {
+    private void addUser(User user) {
         followers.putIfAbsent(user, new ArrayList<>());
         following.putIfAbsent(user, new ArrayList<>());
     }
@@ -157,55 +157,51 @@ public class Graph {
      * 
      * @param follower the user who is following
      * @param target the user being followed
+     * @return true if the relationship was added, false if it already existed
      */
-    public void addFollower(User follower, User target) {
+    public boolean addFollower(User follower, User target) {
         // Add users if they don't exist
         addUser(follower);
         addUser(target);
         
-        // Add the follower relationship
-        followers.get(target).add(follower);  // target's followers include follower
-        following.get(follower).add(target);  // follower is following target
-    }
-    
-    /**
-     * Removes a follower relationship
-     * 
-     * @param follower the user who is following
-     * @param target the user being followed
-     */
-    public void removeFollower(User follower, User target) {
-        if (followers.containsKey(target)) {
-            followers.get(target).remove(follower);
+        // Check if the relationship already exists
+        if (!followers.get(target).contains(follower)) {
+            // Add the follower relationship
+            followers.get(target).add(follower);  // target's followers include follower
+            following.get(follower).add(target);  // follower is following target
+            return true; // Relationship successfully added
         }
-        
-        if (following.containsKey(follower)) {
-            following.get(follower).remove(target);
-        }
+        return false; // Relationship already exists
     }
     
     /**
      * Removes a user and all their relationships
      * 
      * @param user the user to remove
+     * @return true if the user was successfully removed, false if the user did not exist
      */
-    public void removeUser(User user) {
-        // Remove user from all following lists
-        for (List<User> userFollowers : followers.values()) {
-            userFollowers.remove(user);
+    public boolean removeFollower(User follower, User target) {
+        boolean removed = false;
+        
+        // Remove from target's followers list
+        if (followers.containsKey(target)) {
+            if (followers.get(target).remove(follower)) {
+                removed = true;
+                System.out.println("Removed " + follower.getUserName() + " from " + 
+                                 target.getUserName() + "'s followers list");
+            } 
         }
         
-        // Remove user from all follower lists
-        for (List<User> userFollowing : following.values()) {
-            userFollowing.remove(user);
+        // Remove from follower's following list
+        if (following.containsKey(follower)) {
+            if (following.get(follower).remove(target)) {
+                removed = true;
+                System.out.println("Removed " + target.getUserName() + " from " + 
+                                 follower.getUserName() + "'s following list");
+            }
         }
         
-        // Remove the user
-        followers.remove(user);
-        following.remove(user);
-        
-        // Remove from index if present
-        userIndex.values().remove(user);
+        return removed;
     }
     
     /**
@@ -215,7 +211,7 @@ public class Graph {
      * @param key the key to index by (e.g., user ID)
      * @param user the user to index
      */
-    public void indexUser(Object key, User user) {
+    private void indexUser(Object key, User user) {
         if (followers.containsKey(user)) {
             userIndex.put(key, user);
         }
@@ -253,6 +249,16 @@ public class Graph {
     public boolean hasUser(User user) {
         return followers.containsKey(user);
     }
+
+    /**
+     * Gets a user by username
+     * 
+     * @param username the username to look up
+     * @return the user if found, null otherwise
+     */
+    public User getUserByUsername(String username) {
+        return userIndex.get(username);
+    }
     
     /**
      * Gets all followers of a user
@@ -264,6 +270,8 @@ public class Graph {
         return followers.getOrDefault(user, new ArrayList<>());
     }
     
+
+
     /**
      * Gets all users that a user is following
      * 
@@ -277,15 +285,21 @@ public class Graph {
     /**
      * Checks if a user is following another user
      * 
-     * @param follower the potential follower
-     * @param target the potential target
+     * @param follower the user who is following
+     * @param target the user being followed
      * @return true if follower is following target, false otherwise
      */
     public boolean isFollowing(User follower, User target) {
-        return following.containsKey(follower) && 
-               following.get(follower).contains(target);
+        for (Map.Entry<User, List<User>> entry : following.entrySet()) {
+            // Use equals() to find the correct follower
+            if (entry.getKey().equals(follower)) {
+                // Use contains() which will use the equals() method internally
+                return entry.getValue().contains(target);
+            }
+        }
+        return false;
     }
-    
+
     /**
      * Gets a list of users who are followed by users that the specified user follows,
      * but who are not directly followed by the specified user.
@@ -331,7 +345,7 @@ public class Graph {
      * 
      * @return a set of all users
      */
-    public Set<User> getAllUsers() {
+    private Set<User> getAllUsers() {
         return followers.keySet();
     }
     
@@ -344,7 +358,8 @@ public class Graph {
     public int getFollowerCount(User user) {
         return followers.getOrDefault(user, Collections.emptyList()).size();
     }
-    
+
+
     /**
      * Gets the number of users a user is following
      * 
@@ -367,35 +382,122 @@ public class Graph {
         StringBuilder sb = new StringBuilder();
         sb.append("Social Network Graph:\n");
         
-        for (Map.Entry<User, List<User>> entry : followers.entrySet()) {
-            User user = entry.getKey();
-            // Print username instead of toString()
+        // Create a set of all users from both maps
+        Set<User> allUsers = new HashSet<>();
+        allUsers.addAll(followers.keySet());
+        allUsers.addAll(following.keySet());
+        
+        for (User user : allUsers) {
             sb.append("User '").append(user.getUserName()).append("' (ID: ")
               .append(user.getUserID()).append("):\n");
             
-            // Use getFollowers method instead of direct map access
-            List<User> followersList = getFollowers(user);
+            // Get followers
+            List<User> followersList = followers.get(user);
             sb.append("  Followers: [");
-            for (int i = 0; i < followersList.size(); i++) {
-                if (i > 0) {
-                    sb.append(", ");
+            if (followersList != null) {
+                for (int i = 0; i < followersList.size(); i++) {
+                    if (i > 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(followersList.get(i).getUserName());
                 }
-                sb.append(followersList.get(i).getUserName());
             }
             sb.append("]\n");
             
-            // Use getFollowing method for consistency
-            List<User> followingList = getFollowing(user);
+            // Get following
+            List<User> followingList = following.get(user);
             sb.append("  Following: [");
-            for (int i = 0; i < followingList.size(); i++) {
-                if (i > 0) {
-                    sb.append(", ");
+            if (followingList != null) {
+                for (int i = 0; i < followingList.size(); i++) {
+                    if (i > 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(followingList.get(i).getUserName());
                 }
-                sb.append(followingList.get(i).getUserName());
             }
             sb.append("]\n");
         }
         
         return sb.toString();
     }
+
+    /**
+     * Syncs the database with the graph structure.
+     * This method exports the current state of the graph into the database.
+     * It clears the existing relationships in the database and re-adds them based on the current graph state.
+     */
+    public void disconnect() {
+        Connection conn = null;
+        PreparedStatement deleteStatement = null;
+        PreparedStatement insertStatement = null;
+        
+        try {
+            // Get database connection
+            conn = Database.getInstance().getConnection();
+            
+            // Disable auto-commit for transaction
+            conn.setAutoCommit(false);
+            
+            // Delete existing relationships
+            String deleteQuery = "DELETE FROM UserFollower";
+            deleteStatement = conn.prepareStatement(deleteQuery);
+            deleteStatement.executeUpdate();
+            
+            // Prepare insert statement
+            String insertQuery = "INSERT INTO UserFollower (userID, followerID) VALUES (?, ?)";
+            insertStatement = conn.prepareStatement(insertQuery);
+            
+            // Iterate through all users in the graph
+            for (Map.Entry<User, List<User>> entry : this.following.entrySet()) {
+                User currentUser = entry.getKey();
+                List<User> followedUsers = entry.getValue();
+                
+                // For each user this user is following
+                for (User followedUser : followedUsers) {
+                    // Insert the relationship
+                    insertStatement.setInt(1, followedUser.getUserID());  // userID (being followed)
+                    insertStatement.setInt(2, currentUser.getUserID());   // followerID
+                    insertStatement.addBatch();
+                }
+            }
+            
+            // Execute batch insert
+            insertStatement.executeBatch();
+            
+            // Commit the transaction
+            conn.commit();
+            
+            System.out.println("Successfully synced graph relationships to database.");
+            
+        } catch (SQLException e) {
+            // Rollback in case of any error
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    System.err.println("Error during rollback: " + rollbackEx.getMessage());
+                }
+            }
+            
+            System.err.println("Error syncing graph to database: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Restore auto-commit and close resources
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+                
+                if (deleteStatement != null) {
+                    deleteStatement.close();
+                }
+                if (insertStatement != null) {
+                    insertStatement.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error closing resources: " + e.getMessage());
+            }
+        }
+    }
+
 }
