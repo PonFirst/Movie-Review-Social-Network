@@ -23,6 +23,7 @@ public class MainMenu
         return instance;
     }
 
+
     public void displayMainMenu()
     {
         Scanner scanner = new Scanner(System.in);

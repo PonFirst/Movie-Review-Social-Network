@@ -1,6 +1,8 @@
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.sql.*;
 
 public class Review
@@ -274,7 +276,11 @@ public class Review
 
     @Override
     public String toString() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm");
+
+        // Force Gregorian calendar and English locale
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.ENGLISH);
+        dateFormat.setCalendar(new GregorianCalendar());
+
         String formattedDate = dateFormat.format(reviewDate);
         String movieTitle = Movie.getMovieTitleByID(movieID);
 
@@ -284,7 +290,8 @@ public class Review
                 "Rating: " + rating + "/5\n" +
                 "Likes: " + likeCount + "\n" +
                 "Date: " + formattedDate + "\n" +
-                "Review:\n" + text + "\n" +
-                "--------------------";
+                "Review: " + text + "\n" +
+                "--------------------\n";
     }
+
 }

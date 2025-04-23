@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -124,5 +125,13 @@ public class UserGraphManager {
             System.out.println("Genres: " + user.getFavoriteGenres());
             System.out.println("------------------------------");
         }
+    }
+
+    // Display a list of the latest reviews made by the people the user follows
+    public void displayLatestReviews()
+    {
+        User currentUser = AuthenticationManager.getInstance().getCurrentUser();
+        Graph.getInstance().printFollowingLatestReviews(currentUser);
+    
     }
 }

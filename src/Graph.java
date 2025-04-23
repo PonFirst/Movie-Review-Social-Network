@@ -269,8 +269,6 @@ public class Graph {
     public List<User> getFollowers(User user) {
         return followers.getOrDefault(user, new ArrayList<>());
     }
-    
-
 
     /**
      * Gets all users that a user is following
@@ -282,6 +280,7 @@ public class Graph {
         return following.getOrDefault(user, new ArrayList<>());
     }
     
+
     /**
      * Checks if a user is following another user
      * 
@@ -299,6 +298,7 @@ public class Graph {
         }
         return false;
     }
+
 
     /**
      * Gets a list of users who are followed by users that the specified user follows,
@@ -340,6 +340,34 @@ public class Graph {
         return new ArrayList<>(result);
     }
     
+    /**
+     * Prints the latest review from users that the specified user is following.
+     * 
+     * @param user the user whose following list to check
+     */
+    public void printFollowingLatestReviews(User user) {
+        if (!following.containsKey(user)) {
+            System.out.println("You are not following anyone.");
+            return;
+        }
+        
+        List<User> followedUsers = following.get(user);
+        
+        // Print the latest reviews from each followed user
+        for (User followedUser : followedUsers) {
+            Review latestReview = followedUser.getLatestReview();
+
+        if (latestReview == null) {
+            System.out.println(followedUser.getUserName() + " has no reviews.");
+            continue;
+        }
+
+            System.out.println("Latest review from " + followedUser.getUserName() + ":");
+            System.out.print(latestReview);
+        }
+    }
+
+
     /**
      * Gets all users in the graph
      * 

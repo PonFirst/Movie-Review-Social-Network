@@ -193,13 +193,34 @@ public class User
         }
         return 1;
     }
+    
 
-
-
+    public Review getLatestReview() {
+        Connection conn = Database.getInstance().getConnection();
+        String query = "SELECT * FROM Reviews WHERE userID = ? ORDER BY reviewDate DESC LIMIT 1";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, this.userID);
+            ResultSet resultSet = stmt.executeQuery();
+            if (resultSet.next()) {
+                return new Review(
+                        resultSet.getInt("reviewID"),
+                        resultSet.getString("content"), 
+                        resultSet.getInt("rating"),
+                        resultSet.getInt("userID"),
+                        resultSet.getInt("movieID"),
+                        resultSet.getDate("reviewDate"),
+                        resultSet.getInt("likeCount")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to get latest review: " + e.getMessage());
+        }
+        return null;
+    }
+    
 
     private void printLatestReviews(User targetUser) {
         Connection conn = Database.getInstance().getConnection();
-
         
         // Query for latest reviews
         String query = "SELECT " +
