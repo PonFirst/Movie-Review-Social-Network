@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.Scanner;
 
 public class UserGraphManager {
@@ -97,6 +98,31 @@ public class UserGraphManager {
             }
         } else {
             System.out.println("You chose not to unfollow " + userToUnfollow.getUserName() + ".");
+        }
+    }
+
+    public void followRecomendations() {
+        User currentUser = AuthenticationManager.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            System.out.println("You need to be logged in to see recommendations.");
+            return;
+        }
+    
+        // Get recommended users based on the current user's favorite genres
+        List<User> friendsOfFriends = Graph.getInstance().getFriendsOfFriendsNotConnected(currentUser);
+
+        // Check if friendsOfFriends is empty
+        if (friendsOfFriends.isEmpty()) {
+            System.out.println("No friends of friends available for recommendations.");
+            return;
+        }
+
+        // Print the recommended users
+        System.out.println("Recommended users to follow based on your friends of friends:");
+        for (User user : friendsOfFriends) {
+            System.out.println("Username: " + user.getUserName() + ", Name: " + user.getUserName());
+            System.out.println("Genres: " + user.getFavoriteGenres());
+            System.out.println("------------------------------");
         }
     }
 }

@@ -69,7 +69,7 @@ public class MainMenu
                     UserGraphManager.getInstance().unfollowUser();
                     break;
                 case 7:
-
+                    UserGraphManager.getInstance().followRecomendations();
                     return;
                 case 8:
                     authManager.logout();
