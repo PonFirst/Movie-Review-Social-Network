@@ -341,18 +341,19 @@ public class Graph {
      */
     public void printFollowingLatestReviews(User user) {
         if (!following.containsKey(user)) {
-            System.out.println("You are not following anyone.");
             return;
         }
         
         List<User> followedUsers = following.get(user);
         
+
         // Print the latest reviews from each followed user
         for (User followedUser : followedUsers) {
             Review latestReview = followedUser.getLatestReview();
 
+        
         if (latestReview == null) {
-            System.out.println(followedUser.getUserName() + " has no reviews.");
+            //System.out.println(followedUser.getUserName() + " has no reviews.");
             continue;
         }
 
