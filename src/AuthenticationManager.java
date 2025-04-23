@@ -85,7 +85,7 @@ public class AuthenticationManager
                 );
 
                 loggedIn = true;
-                System.out.println("Login successful. Welcome, " + currentUser.getUserName() + "!");
+                System.out.println("Login successful. Welcome, " + currentUser.getUserName() + "!\n");
                 return true;
             }
 
@@ -140,7 +140,7 @@ public class AuthenticationManager
     {
         currentUser = null;
         loggedIn = false;
-        System.out.println("Logged out successfully.");
+        System.out.println("Logged out successfully.\n");
     }
 
 

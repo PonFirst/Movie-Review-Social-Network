@@ -193,7 +193,7 @@ public class User
         }
         return 1;
     }
-    
+
 
     public Review getLatestReview() {
         Connection conn = Database.getInstance().getConnection();
@@ -218,7 +218,7 @@ public class User
         return null;
     }
     
-
+ /* 
     private void printLatestReviews(User targetUser) {
         Connection conn = Database.getInstance().getConnection();
         
@@ -279,7 +279,7 @@ public class User
             e.printStackTrace();
         }
     }
-
+*/
 
     public void displayProfile() {
         // Print user profile information
@@ -289,10 +289,13 @@ public class User
         for (Genre.GenreType genre : this.getFavoriteGenres()) {
             System.out.print(genre + " ");
         }
-        System.out.println(); // New line after genres
+        System.out.println("\n");
         
-        // Call printLatestReviews with the current user instance
-        printLatestReviews(this);
+        if (getLatestReview() != null) {
+            System.out.println("Latest Review: \n" + getLatestReview());
+        } else {
+            System.out.println("No reviews yet.");
+        }
     }
 
 }

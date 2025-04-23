@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -64,6 +63,7 @@ public class UserGraphManager {
         System.out.print("Enter the username of the user you want to unfollow: ");
         Scanner scanner = new Scanner(System.in);
         String username = scanner.nextLine();
+        System.out.println();
     
         User userToUnfollow = Graph.getInstance().getUserByUsername(username);
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
@@ -121,9 +121,9 @@ public class UserGraphManager {
         // Print the recommended users
         System.out.println("Recommended users to follow based on your friends of friends:");
         for (User user : friendsOfFriends) {
-            System.out.println("Username: " + user.getUserName() + ", Name: " + user.getUserName());
+            System.out.println("Username: " + user.getUserName());
             System.out.println("Genres: " + user.getFavoriteGenres());
-            System.out.println("------------------------------");
+            System.out.println("Latest review:\n" + user.getLatestReview());
         }
     }
 

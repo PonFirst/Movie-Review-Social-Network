@@ -34,59 +34,58 @@ public class MainMenu
         }
         User currentUser = authManager.getCurrentUser();
 
-        while (true)
+
+        System.out.println();
+        System.out.println("1. Write Movie Review");
+        System.out.println("2. Edit Review");
+        System.out.println("3. Delete Review");
+        System.out.println("4. Find Movie Review");
+        System.out.println("5. Follow User");
+        System.out.println("6. Unfollow User");
+        System.out.println("7. Ask for Follow Suggestion");
+        System.out.println("8. Logout");
+        System.out.println("9. Exit");
+
+        int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
+        System.out.println();
+
+        switch (option)
         {
-            System.out.println();
-            System.out.println("1. Write Movie Review");
-            System.out.println("2. Edit Review");
-            System.out.println("3. Delete Review");
-            System.out.println("4. Find Movie Review");
-            System.out.println("5. Follow User");
-            System.out.println("6. Unfollow User");
-            System.out.println("7. Ask for Follow Suggestion");
-            System.out.println("8. Logout");
-            System.out.println("9. Exit");
-
-            int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
-
-            switch (option)
-            {
-                case 1:
-                    ReviewManager.getInstance().addReviewMenu(currentUser.getUserID());
-                    break;
-                case 2:
-                    ReviewManager.getInstance().editReviewMenu(currentUser.getUserName());
-                    break;
-                case 3:
-                    ReviewManager.getInstance().deleteReviewMenu(currentUser.getUserName());
-                    break;
-                case 4:
-                    searchReviewMenu(scanner);
-                    break;
-                case 5:
-                    UserGraphManager.getInstance().followUser();
-                    break;
-                case 6:
-                    UserGraphManager.getInstance().unfollowUser();
-                    break;
-                case 7:
-                    UserGraphManager.getInstance().followRecomendations();
-                    return;
-                case 8:
-                    authManager.logout();
-                    break;
-                case 9:
-                    Database.getInstance().disconnect();
-                    Graph.getInstance().disconnect();;
-                    System.exit(0);
-                    break;
-                case 10:
-                    Graph graph = Graph.getInstance();
-                    System.out.println(graph); // Automatically calls the toString() method
-                    break;
-                default:
-                    System.out.println("Invalid option. Try again.");
-            }
+            case 1:
+                ReviewManager.getInstance().addReviewMenu(currentUser.getUserID());
+                break;
+            case 2:
+                ReviewManager.getInstance().editReviewMenu(currentUser.getUserName());
+                break;
+            case 3:
+                ReviewManager.getInstance().deleteReviewMenu(currentUser.getUserName());
+                break;
+            case 4:
+                searchReviewMenu(scanner);
+                break;
+            case 5:
+                UserGraphManager.getInstance().followUser();
+                break;
+            case 6:
+                UserGraphManager.getInstance().unfollowUser();
+                break;
+            case 7:
+                UserGraphManager.getInstance().followRecomendations();
+                return;
+            case 8:
+                authManager.logout();
+                break;
+            case 9:
+                Database.getInstance().disconnect();
+                Graph.getInstance().disconnect();;
+                System.exit(0);
+                break;
+            case 10:
+                Graph graph = Graph.getInstance();
+                System.out.println(graph); // Automatically calls the toString() method
+                break;
+            default:
+                System.out.println("Invalid option. Try again.");
         }
     }
 
@@ -109,13 +108,14 @@ public class MainMenu
                     String email = scanner.nextLine();
                     System.out.print("Enter password: ");
                     String password = scanner.nextLine();
+                    System.out.println();
                     if (authManager.login(email, password))
                     {
                         return;
                     }
                     else 
                     {
-                        System.out.println("Login failed. Please try again.");
+                        System.out.println("Login failed. Please try again.\n");
                     }
                     break;
                 case 2:
@@ -123,6 +123,7 @@ public class MainMenu
                     break;
                 case 3:
                     Database.getInstance().disconnect();
+                    Graph.getInstance().disconnect();
                     System.exit(0);
                     break;
                 default:
@@ -143,6 +144,7 @@ public class MainMenu
             System.out.println("5. Go Back");
 
             int choice = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
+            System.out.println();
 
             switch (choice)
             {
@@ -150,6 +152,7 @@ public class MainMenu
                     while (true) {
                         System.out.print("Enter Movie Title: ");
                         String movieTitle = scanner.nextLine();
+                        System.out.println();
 
                         ArrayList<Review> reviews = SearchReview.findReviewsByMovie(movieTitle);
 
@@ -253,7 +256,7 @@ public class MainMenu
 
                 case 4:
                     while (true) {
-                        System.out.print("Enter Username: ");
+                        System.out.print("Enter Username: \n");
                         String username = scanner.nextLine();
 
                         ArrayList<Review> reviews = SearchReview.findReviewsByUsername(username);

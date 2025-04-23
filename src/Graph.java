@@ -96,8 +96,6 @@ public class Graph {
             }
         }
 
-        // Print the social network structure for debugging
-        System.out.println(this.toString());
     }
     
     /**
@@ -187,8 +185,6 @@ public class Graph {
         if (followers.containsKey(target)) {
             if (followers.get(target).remove(follower)) {
                 removed = true;
-                System.out.println("Removed " + follower.getUserName() + " from " + 
-                                 target.getUserName() + "'s followers list");
             } 
         }
         
@@ -196,8 +192,6 @@ public class Graph {
         if (following.containsKey(follower)) {
             if (following.get(follower).remove(target)) {
                 removed = true;
-                System.out.println("Removed " + target.getUserName() + " from " + 
-                                 follower.getUserName() + "'s following list");
             }
         }
         
