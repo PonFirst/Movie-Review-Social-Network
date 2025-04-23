@@ -27,38 +27,43 @@ public class ReviewManager
 
         System.out.print("Enter Movie Title (or part of it): ");
         String movieTitle = scanner.nextLine();
-
         ArrayList<Movie> matchedMovies = SearchReview.match(movieTitle);
+        Movie selectedMovie = null;
 
         if (matchedMovies.isEmpty()) {
             System.out.println("No matching movies found.");
-            return;
-        }
-
-        System.out.println("Matching Movies:");
-        for (Movie m : matchedMovies) {
-            System.out.println(m.toString());
-        }
-
-        Movie selectedMovie = null;
-
-        if (matchedMovies.size() == 1) {
-            selectedMovie = matchedMovies.get(0);
-        } else {
-            System.out.print("Enter the Movie ID: ");
-            int selectedID = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
-
-            for (Movie m : matchedMovies) {
-                if (m.getMovieID() == selectedID) {
-                    selectedMovie = m;
-                    break;
+            boolean createNew = InputValidator.confirmYes("Would you like to create a new movie? (y/n): ", scanner);
+            if (createNew) {
+                selectedMovie = Movie.createMovie();
+                if (selectedMovie == null) {
+                    System.out.println("Failed to create new movie. Review process canceled.");
+                    return;
                 }
+            } else {
+                System.out.println("Review process canceled.");
+                return;
+            }
+        } else {
+            System.out.println("Matching Movies:");
+            for (Movie m : matchedMovies) {
+                System.out.println(m.toString());
             }
 
-            if (selectedMovie == null) {
-                System.out.println("Invalid Movie ID selected.");
-                return;
+            if (matchedMovies.size() == 1) {
+                selectedMovie = matchedMovies.get(0);
+            } else {
+                int selectedID = InputValidator.getValidatedInt(scanner, "Enter the Movie ID: ");
+                for (Movie m : matchedMovies) {
+                    if (m.getMovieID() == selectedID) {
+                        selectedMovie = m;
+                        break;
+                    }
+                }
+
+                if (selectedMovie == null) {
+                    System.out.println("Invalid Movie ID selected.");
+                    return;
+                }
             }
         }
 
@@ -68,15 +73,18 @@ public class ReviewManager
             return;
         }
 
-        System.out.print("Enter rating (1-5): ");
-        int rating = scanner.nextInt();
-        scanner.nextLine();
+        int rating = InputValidator.getValidatedInt(scanner, "Enter rating (1-5): ");
+        while (rating < 1 || rating > 5) {
+            System.out.println("Invalid rating value. Please enter a rating between 1 and 5.");
+            rating = InputValidator.getValidatedInt(scanner, "Enter rating (1-5): ");
+        }
+        scanner.nextLine(); // Consume newline
 
         System.out.println("Write your review:");
         String reviewText = scanner.nextLine();
 
-        System.out.print("Confirm submission? (y/n): ");
-        if (scanner.nextLine().equalsIgnoreCase("y")) {
+        boolean confirm = InputValidator.confirmYes("Confirm submission? (y/n): ", scanner);
+        if (confirm) {
             Review review = new Review(0, reviewText, rating, userID,
                     selectedMovie.getMovieID(), new Date(), 0);
             if (review.save()) {
