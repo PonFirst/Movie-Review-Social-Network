@@ -20,6 +20,12 @@ public class InputValidator
         }
     }
 
+    public static boolean isValidEmail(String email)
+    {
+        return email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
+    }
+
+
     public static Date readValidDate(String prompt, Scanner scanner, SimpleDateFormat dateFormat)
     {
         while (true)

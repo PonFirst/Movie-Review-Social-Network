@@ -98,36 +98,23 @@ public class AuthenticationManager
         }
     }
 
-    public void register() {
+    public void register()
+    {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        if (User.isUsernameTaken(username))
-        {
-            System.out.println("Username already taken!");
+
+        String username = promptUsername(scanner);
+        String email = promptEmail(scanner);
+        String password = promptPassword(scanner);
+        ArrayList<Genre.GenreType> favoriteGenres = promptGenres(scanner);
+
+        System.out.print("Confirm registration? (y/n): ");
+        String confirm = scanner.nextLine().trim().toLowerCase();
+        if (!confirm.equals("y")) {
+            System.out.println("Registration cancelled.");
             return;
         }
-        System.out.print("Enter email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
-        System.out.print("Enter favorite genres (Comma Separated): ");
-        String genresInput = scanner.nextLine();
 
-        ArrayList<Genre.GenreType> favoriteGenres = new ArrayList<>();
-        String[] genreStrings = genresInput.split(",");
-
-        for (String genreStr : genreStrings) {
-            try {
-                String formatted = genreStr.trim().toUpperCase().replace(' ', '_');
-                Genre.GenreType genreType = Genre.GenreType.valueOf(formatted);
-                favoriteGenres.add(genreType);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid genre: " + genreStr.trim());
-            }
-        }
-
-        int userID = User.getNextUserID(); // get new ID
+        int userID = User.getNextUserID();
         User newUser = new User(userID, username, email, password, favoriteGenres);
         newUser.save();
 
@@ -143,5 +130,72 @@ public class AuthenticationManager
         System.out.println("Logged out successfully.\n");
     }
 
+    private String promptUsername(Scanner scanner)
+    {
+        while (true)
+        {
+            System.out.print("Enter username: ");
+            String username = scanner.nextLine();
+            if (!User.isUsernameTaken(username))
+            {
+                return username;
+            }
+            System.out.println("Username already taken!");
+        }
+    }
+
+    private String promptEmail(Scanner scanner)
+    {
+        while (true) {
+            System.out.print("Enter email: ");
+            String email = scanner.nextLine();
+            if (InputValidator.isValidEmail(email))
+            {
+                return email;
+            }
+            System.out.println("Invalid email format.");
+        }
+    }
+
+    private String promptPassword(Scanner scanner)
+    {
+        System.out.print("Enter password: ");
+        return scanner.nextLine();
+    }
+
+    private ArrayList<Genre.GenreType> promptGenres(Scanner scanner)
+    {
+        Genre.GenreType[] genres = Genre.GenreType.values();
+
+        while (true) {
+            System.out.println("Available genres:");
+            for (int i = 0; i < genres.length; i++) {
+                System.out.print(genres[i]);
+                if (i < genres.length - 1) System.out.print(" | ");
+            }
+            System.out.print("\nEnter favorite genres (Comma Separated): ");
+            String genresInput = scanner.nextLine();
+
+            ArrayList<Genre.GenreType> favoriteGenres = new ArrayList<>();
+            boolean allValid = true;
+
+            for (String genreStr : genresInput.split(",")) {
+                try {
+                    String formatted = genreStr.trim().toUpperCase().replace(' ', '_');
+                    Genre.GenreType genre = Genre.GenreType.valueOf(formatted);
+                    favoriteGenres.add(genre);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid genre: " + genreStr.trim());
+                    allValid = false;
+                }
+            }
+
+            if (allValid && !favoriteGenres.isEmpty()) {
+                return favoriteGenres;
+            }
+
+            System.out.println("Please enter valid genres.");
+        }
+    }
 
 }
