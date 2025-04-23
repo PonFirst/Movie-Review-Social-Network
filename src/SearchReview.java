@@ -186,10 +186,4 @@ public class SearchReview {
         return reviews;
     }
 
-
-
-
-
-
-
 }

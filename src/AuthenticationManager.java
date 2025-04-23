@@ -102,6 +102,11 @@ public class AuthenticationManager
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
+        if (User.isUsernameTaken(username))
+        {
+            System.out.println("Username already taken!");
+            return;
+        }
         System.out.print("Enter email: ");
         String email = scanner.nextLine();
         System.out.print("Enter password: ");

@@ -69,6 +69,21 @@ public class User
         this.genres = genres;
     }
 
+    public static boolean isUsernameTaken(String username) {
+        try (Connection conn = Database.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT 1 FROM users WHERE username = ?"))
+        {
+            stmt.setString(1, username);
+            return stmt.executeQuery().next(); // returns true if username exists
+
+        } catch (SQLException e) {
+            System.err.println("Failed to check username: " + e.getMessage());
+            return true;
+        }
+    }
+
+
+
     public void save() {
         Connection conn = Database.getInstance().getConnection();
         String query = "INSERT INTO users (userID, username, email, password) VALUES (?, ?, ?, ?)";

@@ -89,10 +89,6 @@ public class ReviewManager
         }
     }
 
-
-
-
-
     public void editReviewMenu(String username)
     {
         Scanner scanner = new Scanner(System.in);

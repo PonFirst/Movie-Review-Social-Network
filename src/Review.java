@@ -190,7 +190,8 @@ public class Review
         }
     }
 
-    public void update() {
+    public void update()
+    {
         Connection conn = Database.getInstance().getConnection();
         if (conn == null) {
             System.err.println("Review update failed: database connection is null");
