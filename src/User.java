@@ -70,7 +70,8 @@ public class User
         this.genres = genres;
     }
 
-    public static boolean isUsernameTaken(String username) {
+    public static boolean isUsernameTaken(String username)
+    {
         try (Connection conn = Database.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT 1 FROM users WHERE username = ?"))
         {
@@ -98,7 +99,8 @@ public class User
     }
 
 
-    public void save() {
+    public void save()
+    {
         Connection conn = Database.getInstance().getConnection();
         String query = "INSERT INTO users (userID, username, email, password) VALUES (?, ?, ?, ?)";
 
@@ -195,7 +197,8 @@ public class User
     }
 
 
-    public Review getLatestReview() {
+    public Review getLatestReview()
+    {
         Connection conn = Database.getInstance().getConnection();
         String query = "SELECT * FROM Reviews WHERE userID = ? ORDER BY reviewDate DESC LIMIT 1";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {

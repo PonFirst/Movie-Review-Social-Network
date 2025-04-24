@@ -1,24 +1,27 @@
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class InputValidator
 {
     public static int getValidatedInt(Scanner scanner, String prompt)
     {
-        while (true)
-        {
-            System.out.print(prompt);
-            String input = scanner.nextLine();
-            try
+        while (true) {
+            try {
+                System.out.print(prompt);
+                int value = scanner.nextInt();
+                scanner.nextLine();
+                return value;
+            } catch (InputMismatchException e)
             {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
+                System.out.println("Invalid input. Please enter an integer.");
+                scanner.nextLine();
             }
         }
     }
+
 
     public static boolean isValidEmail(String email)
     {

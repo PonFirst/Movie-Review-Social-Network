@@ -21,7 +21,8 @@ public class ReviewManager
         return instance;
     }
 
-    public void addReviewMenu(int userID) {
+    public void addReviewMenu(int userID)
+    {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter Movie Title (or part of it): ");
@@ -29,7 +30,8 @@ public class ReviewManager
         ArrayList<Movie> matchedMovies = SearchReview.match(movieTitle);
         Movie selectedMovie = null;
 
-        if (matchedMovies.isEmpty()) {
+        if (matchedMovies.isEmpty())
+        {
             System.out.println("No matching movies found.");
             boolean createNew = InputValidator.confirmYes("Would you like to create a new movie? (y/n): ", scanner);
             if (createNew) {
@@ -77,7 +79,6 @@ public class ReviewManager
             System.out.println("Invalid rating value. Please enter a rating between 1 and 5.");
             rating = InputValidator.getValidatedInt(scanner, "Enter rating (1-5): ");
         }
-        scanner.nextLine(); // Consume newline
 
         System.out.println("Write your review:");
         String reviewText = scanner.nextLine();
@@ -99,8 +100,6 @@ public class ReviewManager
     public void editReviewMenu(String username)
     {
         Scanner scanner = new Scanner(System.in);
-
-        // Get reviews by username
         ArrayList<Review> userReviews = SearchReview.findReviewsByUsername(username);
 
         if (userReviews.isEmpty()) {
@@ -109,30 +108,22 @@ public class ReviewManager
             return;
         }
 
-        System.out.println("Reviews for " + username + ":");
-        for (Review review : userReviews) {
-            String textSnippet = review.getText().length() > 50 ? review.getText().substring(0, 50) + "..." : review.getText();
+        displayReviewList(username, userReviews);
 
-            System.out.println("Review ID: " + review.getReviewID());
-            System.out.println("Movie: " + Movie.getMovieTitleByID(review.getMovieID()));
-            System.out.println("Rating: " + review.getRating());
-            System.out.println("Text: " + textSnippet);
-            System.out.println("--------------------");
-        }
-
-        System.out.print("Enter the Review ID to edit: ");
-        int reviewID = scanner.nextInt();
-        scanner.nextLine(); // consume newline
+        int reviewID = InputValidator.getValidatedInt(scanner, "Enter the Review ID to edit: ");
 
         Review selectedReview = null;
-        for (Review review : userReviews) {
-            if (review.getReviewID() == reviewID) {
+        for (Review review : userReviews)
+        {
+            if (review.getReviewID() == reviewID)
+            {
                 selectedReview = review;
                 break;
             }
         }
 
-        if (selectedReview == null) {
+        if (selectedReview == null)
+        {
             System.out.println("Invalid Review ID.");
             scanner.close();
             return;
@@ -141,15 +132,11 @@ public class ReviewManager
         System.out.println("Current Review:");
         System.out.println(selectedReview);
 
-        System.out.print("Enter new rating (1-5): ");
-        int newRating = scanner.nextInt();
-        scanner.nextLine();
-
-        while (newRating < 1 || newRating > 5) {
+        int newRating = InputValidator.getValidatedInt(scanner, "Enter new rating (1-5): ");
+        while (newRating < 1 || newRating > 5)
+        {
             System.out.println("Invalid rating value. Please enter a rating between 1 and 5.");
-            System.out.print("Enter new rating (1-5): ");
-            newRating = scanner.nextInt();
-            scanner.nextLine();
+            newRating = InputValidator.getValidatedInt(scanner, "Enter new rating (1-5): ");
         }
 
         System.out.println("Enter new review text (or leave blank to keep current):");
@@ -162,11 +149,11 @@ public class ReviewManager
             selectedReview.setText(newText);
         }
 
-
-        System.out.print("Confirm changes? (y/n): ");
-        if (scanner.nextLine().equalsIgnoreCase("y"))
+        boolean confirm = InputValidator.confirmYes("Confirm changes? (y/n): ", scanner);
+        if (confirm)
         {
             selectedReview.update();
+            System.out.println("Review updated successfully.");
         }
         else
         {
@@ -174,6 +161,7 @@ public class ReviewManager
         }
         scanner.close();
     }
+
 
     public void deleteReviewMenu(String username)
     {
@@ -187,20 +175,9 @@ public class ReviewManager
             return;
         }
 
-        System.out.println("Your Reviews:");
-        for (Review review : userReviews) {
-            String textSnippet = review.getText().length() > 50 ? review.getText().substring(0, 50) + "..." : review.getText();
+        displayReviewList(username, userReviews);
 
-            System.out.println("Review ID: " + review.getReviewID());
-            System.out.println("Movie: " + Movie.getMovieTitleByID(review.getMovieID()));
-            System.out.println("Rating: " + review.getRating());
-            System.out.println("Text: " + textSnippet);
-            System.out.println("--------------------");
-        }
-
-        System.out.print("Enter the Review ID to delete (or type 0 to cancel): ");
-        int reviewID = scanner.nextInt();
-        scanner.nextLine(); // consume newline
+        int reviewID = InputValidator.getValidatedInt(scanner, "Enter the Review ID to delete (or type 0 to cancel): ");
 
         if (reviewID == 0) {
             System.out.println("Deletion canceled. Returning to main menu.");
@@ -225,17 +202,19 @@ public class ReviewManager
         System.out.println("Selected Review:");
         System.out.println(selectedReview);
 
-        System.out.print("Are you sure you want to delete this review? (y/n): ");
-        String confirm = scanner.nextLine();
-
-        if (confirm.equalsIgnoreCase("y")) {
+        boolean confirm = InputValidator.confirmYes("Are you sure you want to delete this review? (y/n): ", scanner);
+        if (confirm)
+        {
             selectedReview.deleteReview();
             System.out.println("Review deleted successfully.");
-        } else {
+        }
+        else
+        {
             System.out.println("Deletion canceled.");
         }
         scanner.close();
     }
+
 
     public void likeReviewMenu()
     {
@@ -261,5 +240,17 @@ public class ReviewManager
         review.likeReview();
     }
 
+    void displayReviewList(String username, ArrayList<Review> userReviews)
+    {
+        System.out.println("Reviews for " + username + ":");
+        for (Review review : userReviews) {
+            String textSnippet = review.getText().length() > 50 ? review.getText().substring(0, 50) + "..." : review.getText();
 
+            System.out.println("Review ID: " + review.getReviewID());
+            System.out.println("Movie: " + Movie.getMovieTitleByID(review.getMovieID()));
+            System.out.println("Rating: " + review.getRating());
+            System.out.println("Text: " + textSnippet);
+            System.out.println("--------------------");
+        }
+    }
 }

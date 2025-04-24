@@ -74,16 +74,11 @@ public class AuthenticationManager
                     }
                 }
 
-                currentUser = new User(
-                        userID,
-                        resultSet.getString("username"),
-                        email,
-                        password,
-                        favoriteGenres
+                currentUser = new User(userID, resultSet.getString("username"), email, password, favoriteGenres
                 );
 
                 loggedIn = true;
-                System.out.println("Login successful. Welcome, " + currentUser.getUserName() + "!\n");
+                System.out.println("Login successful. Welcome, " + currentUser.getUserName() + "!");
                 return true;
             }
 

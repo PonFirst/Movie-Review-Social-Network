@@ -81,7 +81,7 @@ public class MainMenu
                 break;
             case 10:
                 Graph graph = Graph.getInstance();
-                System.out.println(graph); // Automatically calls the toString() method
+                System.out.println(graph);
                 break;
             default:
                 System.out.println("Invalid option. Try again.");
