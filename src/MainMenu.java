@@ -8,7 +8,7 @@ public class MainMenu
     private static MainMenu instance;
     private AuthenticationManager authManager;
 
-    protected MainMenu()
+    private MainMenu()
     {
         authManager = AuthenticationManager.getInstance();
     }

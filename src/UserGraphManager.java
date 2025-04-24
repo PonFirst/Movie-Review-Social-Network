@@ -1,13 +1,12 @@
 import java.util.List;
 import java.util.Scanner;
 
-public class UserGraphManager extends MainMenu{
+public class UserGraphManager{
     // Static instance of the class
     private static UserGraphManager instance;
 
     // Private constructor to prevent instantiation
     private UserGraphManager() {
-        super();
     }
 
     // Public method to provide access to the single instance
@@ -22,7 +21,7 @@ public class UserGraphManager extends MainMenu{
         return instance;
     }
 
-    protected void followUser() {
+    public void followUser() {
         System.out.print("Enter the username of the user you want to follow: ");
         Scanner scanner = new Scanner(System.in);
         String username = scanner.nextLine();
@@ -61,7 +60,7 @@ public class UserGraphManager extends MainMenu{
     }
     
 
-    protected void unfollowUser() {
+    public void unfollowUser() {
         System.out.print("Enter the username of the user you want to unfollow: ");
         Scanner scanner = new Scanner(System.in);
         String username = scanner.nextLine();
@@ -105,7 +104,7 @@ public class UserGraphManager extends MainMenu{
         }
     }
 
-    protected void followRecomendations() {
+    public void followRecomendations() {
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
         if (currentUser == null) {
             System.out.println("You need to be logged in to see recommendations.");
@@ -131,7 +130,7 @@ public class UserGraphManager extends MainMenu{
     }
 
     // Display a list of the latest reviews made by the people the user follows
-    protected void displayLatestReviews()
+    public void displayLatestReviews()
     {
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
         Graph.getInstance().printFollowingLatestReviews(currentUser);
