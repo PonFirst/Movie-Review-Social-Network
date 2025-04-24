@@ -1,6 +1,5 @@
 import java.util.Scanner;
 
-import javafx.scene.chart.PieChart.Data;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,7 +15,6 @@ public class AuthenticationManager
     private static AuthenticationManager instance;
     private User currentUser;
     private boolean loggedIn = false;
-    private Database database = Database.getInstance();
 
     private AuthenticationManager()
     {

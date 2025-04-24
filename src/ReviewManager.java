@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -106,6 +105,7 @@ public class ReviewManager
 
         if (userReviews.isEmpty()) {
             System.out.println("No reviews found for user: " + username);
+            scanner.close();
             return;
         }
 
@@ -134,6 +134,7 @@ public class ReviewManager
 
         if (selectedReview == null) {
             System.out.println("Invalid Review ID.");
+            scanner.close();
             return;
         }
 
@@ -171,6 +172,7 @@ public class ReviewManager
         {
             System.out.println("Edit canceled.");
         }
+        scanner.close();
     }
 
     public void deleteReviewMenu(String username)
@@ -181,6 +183,7 @@ public class ReviewManager
 
         if (userReviews.isEmpty()) {
             System.out.println("You have no reviews to delete.");
+            scanner.close();
             return;
         }
 
@@ -201,6 +204,7 @@ public class ReviewManager
 
         if (reviewID == 0) {
             System.out.println("Deletion canceled. Returning to main menu.");
+            scanner.close();
             return;
         }
 
@@ -214,6 +218,7 @@ public class ReviewManager
 
         if (selectedReview == null) {
             System.out.println("Invalid Review ID.");
+            scanner.close();
             return;
         }
 
@@ -229,6 +234,7 @@ public class ReviewManager
         } else {
             System.out.println("Deletion canceled.");
         }
+        scanner.close();
     }
 
     public void likeReviewMenu()
@@ -240,15 +246,18 @@ public class ReviewManager
             reviewID = Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             System.out.println("Invalid review ID format.");
+            scanner.close();
             return;
         }
 
         Review review = Review.getReviewByID(reviewID);
         if (review == null) {
             System.out.println("Review not found.");
+            scanner.close();
             return;
         }
 
+        scanner.close();
         review.likeReview();
     }
 

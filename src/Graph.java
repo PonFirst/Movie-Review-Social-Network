@@ -221,28 +221,6 @@ public class Graph {
         return userIndex.get(key);
     }
     
-    /**
-     * Gets a user if it exists in the graph
-     * 
-     * @param user the user to retrieve
-     * @return the user object if found, null otherwise
-     */
-    public User getUser(User user) {
-        if (followers.containsKey(user)) {
-            return user;
-        }
-        return null;
-    }
-    
-    /**
-     * Checks if the graph contains a user
-     * 
-     * @param user the user to check
-     * @return true if the user exists, false otherwise
-     */
-    public boolean hasUser(User user) {
-        return followers.containsKey(user);
-    }
 
     /**
      * Gets a user by username
@@ -362,15 +340,6 @@ public class Graph {
         }
     }
 
-
-    /**
-     * Gets all users in the graph
-     * 
-     * @return a set of all users
-     */
-    private Set<User> getAllUsers() {
-        return followers.keySet();
-    }
     
     /**
      * Gets the number of followers a user has
@@ -394,7 +363,7 @@ public class Graph {
     }
     
     /**
-     * DEBUGGING METHOD - Prints a human-readable representation of the social network.
+     * DEBUGGING METHOD - Prints a graph representation of the social network.
      * This method is for development/debugging visualization only and not needed for
      * core functionality.
      * 

@@ -1,4 +1,3 @@
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,7 +8,7 @@ public class MainMenu
     private static MainMenu instance;
     private AuthenticationManager authManager;
 
-    private MainMenu()
+    protected MainMenu()
     {
         authManager = AuthenticationManager.getInstance();
     }
@@ -111,6 +110,7 @@ public class MainMenu
                     System.out.println();
                     if (authManager.login(email, password))
                     {
+                        UserGraphManager.getInstance().displayLatestReviews();
                         return;
                     }
                     else 

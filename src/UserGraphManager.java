@@ -1,12 +1,13 @@
 import java.util.List;
 import java.util.Scanner;
 
-public class UserGraphManager {
+public class UserGraphManager extends MainMenu{
     // Static instance of the class
     private static UserGraphManager instance;
 
     // Private constructor to prevent instantiation
     private UserGraphManager() {
+        super();
     }
 
     // Public method to provide access to the single instance
@@ -21,10 +22,11 @@ public class UserGraphManager {
         return instance;
     }
 
-    public void followUser() {
+    protected void followUser() {
         System.out.print("Enter the username of the user you want to follow: ");
         Scanner scanner = new Scanner(System.in);
         String username = scanner.nextLine();
+        scanner.close();
     
         User userToFollow = Graph.getInstance().getUserByUsername(username);
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
@@ -59,10 +61,11 @@ public class UserGraphManager {
     }
     
 
-    public void unfollowUser() {
+    protected void unfollowUser() {
         System.out.print("Enter the username of the user you want to unfollow: ");
         Scanner scanner = new Scanner(System.in);
         String username = scanner.nextLine();
+        scanner.close();
         System.out.println();
     
         User userToUnfollow = Graph.getInstance().getUserByUsername(username);
@@ -102,7 +105,7 @@ public class UserGraphManager {
         }
     }
 
-    public void followRecomendations() {
+    protected void followRecomendations() {
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
         if (currentUser == null) {
             System.out.println("You need to be logged in to see recommendations.");
@@ -128,7 +131,7 @@ public class UserGraphManager {
     }
 
     // Display a list of the latest reviews made by the people the user follows
-    public void displayLatestReviews()
+    protected void displayLatestReviews()
     {
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
         Graph.getInstance().printFollowingLatestReviews(currentUser);
