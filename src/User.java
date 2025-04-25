@@ -39,15 +39,6 @@ public class User
     }
 
     /**
-     * Sets the user's ID
-     * @param userID the new user ID
-     */
-    public void setUserID(int userID)
-    {
-        this.userID = userID;
-    }
-
-    /**
      * Get the user's username
      * @return the username
      */
@@ -57,66 +48,12 @@ public class User
     }
 
     /**
-     * Sets the user's username
-     * @param username the new username
-     */
-    public void setUserName(String username)
-    {
-        this.username = username;
-    }
-
-    /**
-     * Get the user's email address
-     * @return the email address
-     */
-    public String getEmail()
-    {
-        return email;
-    }
-
-    /**
-     * Sets the user's email address
-     * @param email the new email address
-     */
-    public void setEmail(String email)
-    {
-        this.email = email;
-    }
-
-    /**
-     * Get the user's password
-     * @return the password
-     */
-    public String getPassword()
-    {
-        return password;
-    }
-
-    /**
-     * Sets the user's password
-     * @param password the new password
-     */
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
-
-    /**
      * Get the list of the user's favorite genres
      * @return the list of favorite genres
      */
     public ArrayList<Genre.GenreType> getFavoriteGenres()
     {
         return genres;
-    }
-
-    /**
-     * Sets the list of the user's favorite genres
-     * @param genres the new list of favorite genres
-     */
-    public void setFavoriteGenres(ArrayList<Genre.GenreType> genres)
-    {
-        this.genres = genres;
     }
 
     /**

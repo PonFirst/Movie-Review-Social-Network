@@ -92,25 +92,6 @@ public class Review
     }
 
     /**
-     * Get the number of likes the review has received.
-     * @return the like count
-     */
-    public int getLikeCount() {
-        return likeCount;
-    }
-
-    /**
-     * Updates the review's text and rating
-     * @param text   the new review text
-     * @param rating the new rating
-     */
-    public void editReview(String text, int rating)
-    {
-        this.text = text;
-        this.rating = rating;
-    }
-
-    /**
      * Deletes the review from the database.
      * Uses the reviewID to remove the corresponding record from the reviews table.
      */
