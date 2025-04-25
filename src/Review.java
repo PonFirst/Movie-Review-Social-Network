@@ -292,41 +292,6 @@ public class Review
     }
 
     /**
-     * Loads all reviews from the database and returns them as a list
-     * @return a list of all Review objects in the database
-     */
-    public static ArrayList<Review> load()
-    {
-        ArrayList<Review> reviews = new ArrayList<>();
-        Connection connection = Database.getInstance().getConnection();
-        String query = "SELECT * FROM Reviews";
-
-        try (PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery())
-        {
-            while (resultSet.next())
-            {
-                int reviewID = resultSet.getInt("reviewID");
-                int movieID = resultSet.getInt("movieID");
-                int userID = resultSet.getInt("userID");
-                String content = resultSet.getString("content");
-                int rating = resultSet.getInt("rating");
-                Date reviewDate = resultSet.getDate("reviewDate");
-                int likeCount = resultSet.getInt("likeCount");
-
-                Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
-                reviews.add(review);
-            }
-        }
-        catch (SQLException e)
-        {
-            System.err.println("Error loading reviews: " + e.getMessage());
-        }
-
-        return reviews;
-    }
-
-    /**
      * Get a review from the database by its ID.
      * @param reviewID the ID of the review to get
      * @return the Review object if found, or null if not found or an error occurs

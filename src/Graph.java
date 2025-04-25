@@ -5,7 +5,8 @@ import java.sql.*;
  * A social network graph implementation using HashMaps to store user relationships.
  * Optimized for follower/following relationships between users.
  */
-public class Graph {
+public class Graph
+{
     // Singleton instance
     private static Graph instance = null;
     

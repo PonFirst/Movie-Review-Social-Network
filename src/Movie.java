@@ -27,62 +27,12 @@ public class Movie
     }
 
     /**
-     * Returns the movie ID.
-     *
+     * Returns the movie ID
      * @return the movie ID
      */
     public int getMovieID()
     {
         return movieID;
-    }
-
-    /**
-     * Sets the movie ID.
-     *
-     * @param movieID the new movie ID
-     */
-    public void setMovieID(int movieID)
-    {
-        this.movieID = movieID;
-    }
-
-    /**
-     * Returns the title of the movie.
-     *
-     * @return the movie title
-     */
-    public String getMovieTitle()
-    {
-        return title;
-    }
-
-    /**
-     * Sets the title of the movie.
-     *
-     * @param title the new movie title
-     */
-    public void setMovieTitle(String title)
-    {
-        this.title = title;
-    }
-
-    /**
-     * Returns the genre of the movie.
-     *
-     * @return the movie genre
-     */
-    public Genre.GenreType getGenre() {
-        return genre;
-    }
-
-    /**
-     * Sets the genre of the movie.
-     *
-     * @param genre the new movie genre
-     */
-    public void setGenre(Genre.GenreType genre)
-    {
-        this.genre = genre;
     }
 
     /**
