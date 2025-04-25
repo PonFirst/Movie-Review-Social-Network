@@ -94,6 +94,7 @@ public class MainMenu
             case 9:
                 Database.getInstance().disconnect();
                 Graph.getInstance().disconnect();
+                scanner.close();
                 System.exit(0);
                 break;
             case 10:
@@ -143,6 +144,7 @@ public class MainMenu
                 case 3:
                     Database.getInstance().disconnect();
                     Graph.getInstance().disconnect();
+                    scanner.close();
                     System.exit(0);
                     break;
                 default:
