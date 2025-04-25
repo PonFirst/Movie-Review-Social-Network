@@ -21,11 +21,10 @@ public class UserGraphManager{
         return instance;
     }
 
-    public void followUser() {
+    public void followUser(Scanner scanner)
+    {
         System.out.print("Enter the username of the user you want to follow: ");
-        Scanner scanner = new Scanner(System.in);
         String username = scanner.nextLine();
-        scanner.close();
     
         User userToFollow = Graph.getInstance().getUserByUsername(username);
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
@@ -60,11 +59,10 @@ public class UserGraphManager{
     }
     
 
-    public void unfollowUser() {
+    public void unfollowUser(Scanner scanner)
+    {
         System.out.print("Enter the username of the user you want to unfollow: ");
-        Scanner scanner = new Scanner(System.in);
         String username = scanner.nextLine();
-        scanner.close();
         System.out.println();
     
         User userToUnfollow = Graph.getInstance().getUserByUsername(username);

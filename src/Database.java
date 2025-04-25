@@ -1,16 +1,29 @@
 import java.sql.*;
 
+/**
+ * Database class handles the connection to the SQLite database.
+ * It ensures a single connection is used throughout the application by using the Singleton design pattern.
+ */
 public class Database
 {
-    private static Database instance;
-    private Connection connection;
-    private static final String DATABASE_URL = "jdbc:sqlite:app.db";
+    private static Database instance;   // The single instance of the Database class
+    private Connection connection;  // Connection to the database
+    private static final String DATABASE_URL = "jdbc:sqlite:app.db"; // The URL to connect to the SQLite database
 
+    /**
+     * Private constructor that connects to the database.
+     */
     private Database()
     {
         connect();
     }
 
+    /**
+     * Returns the singleton instance of the Database class.
+     * If the instance does not exist, it creates a new one.
+     *
+     * @return the instance of the Database class
+     */
     public static Database getInstance()
     {
         if (instance == null)
@@ -20,6 +33,9 @@ public class Database
         return instance;
     }
 
+    /**
+     * Establishes a connection to the SQLite database.
+     */
     private void connect()
     {
         try
@@ -37,7 +53,11 @@ public class Database
         }
     }
 
-    // Class public methods
+    /**
+     * Returns the database connection, reconnecting if it's null or closed.
+     *
+     * @return the current database connection
+     */
     public Connection getConnection()
     {
         try
@@ -47,12 +67,17 @@ public class Database
             {
                 connect();
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("Error checking connection status: " + e.getMessage());
         }
         return connection;
     }
 
+    /**
+     * Closes the database connection if it's open and nullifies the connection object.
+     */
     public void disconnect()
     {
         try

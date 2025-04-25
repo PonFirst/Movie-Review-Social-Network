@@ -2,16 +2,30 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
+/**
+ * ReviewManager class handles the management of movie reviews, including adding, editing, deleting,
+ * and liking reviews. It provides functionality for users to interact with their movie reviews.
+ * The class uses singleton design pattern to ensure a single instance is used throughout the
+ * application.
+ */
 public class ReviewManager
 {
-    private static ReviewManager instance;
+    private static ReviewManager instance;  //
     private ArrayList<Review> reviews;
 
+    /**
+     * Private constructor to initialize the reviews list.
+     */
     private ReviewManager()
     {
         reviews = new ArrayList<>();
     }
 
+    /**
+     * Returns the single instance of ReviewManager. If the instance does not exist,
+     * it creates a new one.
+     * @return The single instance of ReviewManager.
+     */
     public static ReviewManager getInstance()
     {
         if (instance == null)
@@ -21,10 +35,13 @@ public class ReviewManager
         return instance;
     }
 
-    public void addReviewMenu(int userID)
+    /**
+     * Allows the user to select a movie either by searching for an existing movie or creating a new one.
+     * @param scanner The Scanner object used for input
+     * @return The selected Movie object, or null if the process was canceled
+     */
+    private Movie selectMovie(Scanner scanner)
     {
-        Scanner scanner = new Scanner(System.in);
-
         System.out.print("Enter Movie Title (or part of it): ");
         String movieTitle = scanner.nextLine();
         ArrayList<Movie> matchedMovies = SearchReview.match(movieTitle);
@@ -34,48 +51,107 @@ public class ReviewManager
         {
             System.out.println("No matching movies found.");
             boolean createNew = InputValidator.confirmYes("Would you like to create a new movie? (y/n): ", scanner);
-            if (createNew) {
+            if (createNew)
+            {
                 selectedMovie = Movie.createMovie();
-                if (selectedMovie == null) {
+                if (selectedMovie == null)
+                {
                     System.out.println("Failed to create new movie. Review process canceled.");
-                    return;
+                    return null;
                 }
-            } else {
-                System.out.println("Review process canceled.");
-                return;
             }
-        } else {
+            else
+            {
+                System.out.println("Review process canceled.");
+                return null;
+            }
+        }
+        else
+        {
             System.out.println("Matching Movies:");
-            for (Movie m : matchedMovies) {
+            for (Movie m : matchedMovies)
+            {
                 System.out.println(m.toString());
             }
 
-            if (matchedMovies.size() == 1) {
+            if (matchedMovies.size() == 1)
+            {
                 selectedMovie = matchedMovies.get(0);
-            } else {
+            }
+            else
+            {
                 int selectedID = InputValidator.getValidatedInt(scanner, "Enter the Movie ID: ");
-                for (Movie m : matchedMovies) {
-                    if (m.getMovieID() == selectedID) {
+                for (Movie m : matchedMovies)
+                {
+                    if (m.getMovieID() == selectedID)
+                    {
                         selectedMovie = m;
                         break;
                     }
                 }
-
-                if (selectedMovie == null) {
+                if (selectedMovie == null)
+                {
                     System.out.println("Invalid Movie ID selected.");
-                    return;
+                    return null;
                 }
             }
         }
+        return selectedMovie;
+    }
 
-        // Check if user already reviewed this movie
-        if (Review.userHasReviewedMovie(userID, selectedMovie.getMovieID())) {
+    private Review selectReview(String username, Scanner scanner, String action)
+    {
+        ArrayList<Review> userReviews = SearchReview.findReviewsByUsername(username);
+
+        if (userReviews.isEmpty())
+        {
+            System.out.println("No reviews found for user: " + username);
+            return null;
+        }
+
+        displayReviewList(username, userReviews);
+        int reviewID = InputValidator.getValidatedInt(scanner, "Enter the Review ID to " + action + " (or type 0 to cancel): ");
+
+        if (reviewID == 0)
+        {
+            System.out.println(Character.toUpperCase(action.charAt(0)) + action.substring(1) + " canceled.");
+            return null;
+        }
+
+        for (Review review : userReviews)
+        {
+            if (review.getReviewID() == reviewID)
+            {
+                return review;
+            }
+        }
+        System.out.println("Invalid Review ID.");
+        return null;
+    }
+
+    /**
+     * Handles the process of adding a new review for a selected movie.
+     * @param userID The ID of the user adding the review
+     */
+    public void addReviewMenu(int userID, Scanner scanner)
+    {
+        Movie selectedMovie = selectMovie(scanner);
+        if (selectedMovie == null)
+        {
+            return;
+        }
+
+        // Check if user has already reviewed this movie
+        if (Review.userHasReviewedMovie(userID, selectedMovie.getMovieID()))
+        {
             System.out.println("You have already published a review for this movie.");
             return;
         }
 
+        // Get review details from the user
         int rating = InputValidator.getValidatedInt(scanner, "Enter rating (1-5): ");
-        while (rating < 1 || rating > 5) {
+        while (rating < 1 || rating > 5)
+        {
             System.out.println("Invalid rating value. Please enter a rating between 1 and 5.");
             rating = InputValidator.getValidatedInt(scanner, "Enter rating (1-5): ");
         }
@@ -84,48 +160,31 @@ public class ReviewManager
         String reviewText = scanner.nextLine();
 
         boolean confirm = InputValidator.confirmYes("Confirm submission? (y/n): ", scanner);
-        if (confirm) {
+        if (confirm)
+        {
             Review review = new Review(0, reviewText, rating, userID,
                     selectedMovie.getMovieID(), new Date(), 0);
-            if (review.save()) {
+            if (review.save())
+            {
                 System.out.println("Review published successfully.");
-            } else {
+            }
+            else
+            {
                 System.out.println("Failed to publish review.");
             }
-        } else {
+        }
+        else
+        {
             System.out.println("Review canceled.");
         }
     }
 
-    public void editReviewMenu(String username)
+    public void editReviewMenu(String username, Scanner scanner)
     {
-        Scanner scanner = new Scanner(System.in);
-        ArrayList<Review> userReviews = SearchReview.findReviewsByUsername(username);
-
-        if (userReviews.isEmpty()) {
-            System.out.println("No reviews found for user: " + username);
-            scanner.close();
-            return;
-        }
-
-        displayReviewList(username, userReviews);
-
-        int reviewID = InputValidator.getValidatedInt(scanner, "Enter the Review ID to edit: ");
-
-        Review selectedReview = null;
-        for (Review review : userReviews)
-        {
-            if (review.getReviewID() == reviewID)
-            {
-                selectedReview = review;
-                break;
-            }
-        }
+        Review selectedReview = selectReview(username, scanner, "edit");
 
         if (selectedReview == null)
         {
-            System.out.println("Invalid Review ID.");
-            scanner.close();
             return;
         }
 
@@ -143,7 +202,6 @@ public class ReviewManager
         String newText = scanner.nextLine();
 
         selectedReview.setRating(newRating);
-
         if (!newText.isEmpty())
         {
             selectedReview.setText(newText);
@@ -153,49 +211,21 @@ public class ReviewManager
         if (confirm)
         {
             selectedReview.update();
-            System.out.println("Review updated successfully.");
         }
         else
         {
             System.out.println("Edit canceled.");
         }
-        scanner.close();
     }
 
 
-    public void deleteReviewMenu(String username)
+
+    public void deleteReviewMenu(String username, Scanner scanner)
     {
-        Scanner scanner = new Scanner(System.in);
+        Review selectedReview = selectReview(username, scanner, "delete");
 
-        ArrayList<Review> userReviews = SearchReview.findReviewsByUsername(username);
-
-        if (userReviews.isEmpty()) {
-            System.out.println("You have no reviews to delete.");
-            scanner.close();
-            return;
-        }
-
-        displayReviewList(username, userReviews);
-
-        int reviewID = InputValidator.getValidatedInt(scanner, "Enter the Review ID to delete (or type 0 to cancel): ");
-
-        if (reviewID == 0) {
-            System.out.println("Deletion canceled. Returning to main menu.");
-            scanner.close();
-            return;
-        }
-
-        Review selectedReview = null;
-        for (Review review : userReviews) {
-            if (review.getReviewID() == reviewID) {
-                selectedReview = review;
-                break;
-            }
-        }
-
-        if (selectedReview == null) {
-            System.out.println("Invalid Review ID.");
-            scanner.close();
+        if (selectedReview == null)
+        {
             return;
         }
 
@@ -212,31 +242,21 @@ public class ReviewManager
         {
             System.out.println("Deletion canceled.");
         }
-        scanner.close();
     }
 
 
-    public void likeReviewMenu()
+
+    public void likeReviewMenu(Scanner scanner)
     {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter Review ID to like: ");
-        int reviewID = -1;
-        try {
-            reviewID = Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid review ID format.");
-            scanner.close();
-            return;
-        }
+        int reviewID = InputValidator.getValidatedInt(scanner, "Enter Review ID to like: ");
 
         Review review = Review.getReviewByID(reviewID);
-        if (review == null) {
+        if (review == null)
+        {
             System.out.println("Review not found.");
-            scanner.close();
             return;
         }
 
-        scanner.close();
         review.likeReview();
     }
 

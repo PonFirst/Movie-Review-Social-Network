@@ -4,30 +4,51 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class SearchReview {
+/**
+ * SearchReview class handles searching and displaying movie reviews based on different criteria.
+ * It provides methods to search reviews by movie title, genre, username, and date range.
+ * The class utilizes the Singleton pattern and interacts with the database to get reviews.
+ */
+public class SearchReview
+{
+    // Singleton instance of SearchReview
     private static SearchReview instance;
 
-    private SearchReview() {
+    // Private constructor to prevent instantiation
+    private SearchReview()
+    {
     }
 
-    public static SearchReview getInstance() {
-        if (instance == null) {
+    // Returns the singleton instance of SearchReview
+    public static SearchReview getInstance()
+    {
+        if (instance == null)
+        {
             instance = new SearchReview();
         }
         return instance;
     }
 
-    public static ArrayList<Movie> match(String titleKeyword) {
+    /**
+     * Searches for movies whose titles match the given keyword.
+     * @param titleKeyword The keyword to match against movie titles
+     * @return A list of movies whose titles contain the given keyword
+     */
+    public static ArrayList<Movie> match(String titleKeyword)
+    {
         ArrayList<Movie> matchedMovies = new ArrayList<>();
         String sql = "SELECT * FROM movies WHERE title LIKE ?";
 
         try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(sql))
+        {
 
-            stmt.setString(1, "%" + titleKeyword + "%");
+            statement.setString(1, "%" + titleKeyword + "%");
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
+            try (ResultSet rs = statement.executeQuery())
+            {
+                while (rs.next())
+                {
                     int id = rs.getInt("id");
                     String title = rs.getString("title");
                     String genreStr = rs.getString("genres").trim().toUpperCase().replace(' ', '_');
@@ -38,25 +59,33 @@ public class SearchReview {
                 }
             }
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("Error finding matching movies: " + e.getMessage());
         }
 
         return matchedMovies;
     }
 
-    public static ArrayList<Review> findReviewsByMovie(String movieTitle) {
+    /**
+     * Finds all reviews for a movie based on its title.
+     * @param movieTitle The title of the movie
+     * @return A list of reviews for the movie
+     */
+    public static ArrayList<Review> findReviewsByMovie(String movieTitle)
+    {
         ArrayList<Review> reviews = new ArrayList<>();
         String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
-                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE LOWER(m.title) LIKE LOWER(?)"; // Normalize both sides
+                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE LOWER(m.title) LIKE LOWER(?)";
 
         try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(sql))
+        {
+            statement.setString(1, "%" + movieTitle.trim().toLowerCase() + "%");
 
-            // Normalize user input to match with the movie titles in the database
-            stmt.setString(1, "%" + movieTitle.trim().toLowerCase() + "%");
-
-            try (ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = statement.executeQuery())
+            {
                 while (rs.next()) {
                     int reviewID = rs.getInt("reviewID");
                     String content = rs.getString("content");
@@ -70,25 +99,34 @@ public class SearchReview {
                     reviews.add(review);
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("Error finding reviews by movie: " + e.getMessage());
         }
 
         return reviews;
     }
 
-    public static ArrayList<Review> findReviewsByUsername(String username) {
+    /**
+     * Finds all reviews based on username.
+     * @param username The username of the reviewer
+     * @return A list of reviews written by the user
+     */
+    public static ArrayList<Review> findReviewsByUsername(String username)
+    {
         ArrayList<Review> reviews = new ArrayList<>();
 
         String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
                 "FROM reviews r JOIN users u ON r.userID = u.userID WHERE u.username = ?";
 
         try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(sql))
+        {
+            statement.setString(1, username);
 
-            stmt.setString(1, username);
-
-            try (ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = statement.executeQuery())
+            {
                 while (rs.next()) {
                     int reviewID = rs.getInt("reviewID");
                     String content = rs.getString("content");
@@ -101,23 +139,33 @@ public class SearchReview {
                     Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
                     reviews.add(review);
                 }
-
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("Error finding reviews by username: " + e.getMessage());
         }
 
         return reviews;
     }
 
-    public static ArrayList<Review> findReviewsByGenre(String genreInput) {
+    /**
+     * Finds all reviews for movies of a specific genre.
+     * @param genreInput The genre to search for
+     * @return A list of reviews for movies in the given genre
+     */
+    public static ArrayList<Review> findReviewsByGenre(String genreInput)
+    {
         ArrayList<Review> reviews = new ArrayList<>();
 
         // Validate genre
         Genre.GenreType genreType;
-        try {
+        try
+        {
             genreType = Genre.GenreType.valueOf(genreInput.trim().toUpperCase().replace(' ', '_'));
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e)
+        {
             System.out.println("Invalid movie genre: " + genreInput);
             return null;
         }
@@ -126,13 +174,14 @@ public class SearchReview {
                 "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE m.genres LIKE ?";
 
         try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(sql))
+        {
+            statement.setString(1, "%" + genreType.toString() + "%");
 
-            // Use wildcards to allow genre to be part of a list, e.g., 'ADVENTURE, FANTASY'
-            stmt.setString(1, "%" + genreType.toString() + "%");
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
+            try (ResultSet rs = statement.executeQuery())
+            {
+                while (rs.next())
+                {
                     int reviewID = rs.getInt("reviewID");
                     String content = rs.getString("content");
                     int rating = rs.getInt("rating");
@@ -145,13 +194,21 @@ public class SearchReview {
                     reviews.add(review);
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("Error finding reviews by genre: " + e.getMessage());
         }
 
         return reviews;
     }
 
+    /**
+     * Finds all reviews within a given date range.
+     * @param startDate The start of the date range
+     * @param endDate The end of the date range
+     * @return A list of reviews within the date range
+     */
     public static ArrayList<Review> findReviewsByDateRange(Date startDate, Date endDate)
     {
         ArrayList<Review> reviews = new ArrayList<>();
@@ -161,13 +218,16 @@ public class SearchReview {
         Timestamp endTimestamp = new Timestamp(endDate.getTime() + (24 * 60 * 60 * 1000) - 1);
 
         try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement statement = conn.prepareStatement(sql))
+        {
 
-            stmt.setTimestamp(1, startTimestamp);
-            stmt.setTimestamp(2, endTimestamp);
+            statement.setTimestamp(1, startTimestamp);
+            statement.setTimestamp(2, endTimestamp);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
+            try (ResultSet rs = statement.executeQuery())
+            {
+                while (rs.next())
+                {
                     int reviewID = rs.getInt("reviewID");
                     String content = rs.getString("content");
                     int rating = rs.getInt("rating");
@@ -181,13 +241,19 @@ public class SearchReview {
                 }
             }
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("Error finding reviews by date range: " + e.getMessage());
         }
 
         return reviews;
     }
 
+    /**
+     * Asks the user to search for reviews by movie title and displays the results.
+     * @param scanner The scanner to read user input
+     */
     public static void searchByMovieTitle(Scanner scanner)
     {
         while (true)
@@ -214,7 +280,7 @@ public class SearchReview {
 
                 if (likeChoice)
                 {
-                    ReviewManager.getInstance().likeReviewMenu();
+                    ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
 
@@ -224,6 +290,10 @@ public class SearchReview {
         }
     }
 
+    /**
+     * Asks the user to search for reviews by genre and displays the results.
+     * @param scanner The scanner to read user input
+     */
     public static void searchByGenre(Scanner scanner)
     {
         while (true)
@@ -256,7 +326,7 @@ public class SearchReview {
 
                 if (likeChoice)
                 {
-                    ReviewManager.getInstance().likeReviewMenu();
+                    ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
 
@@ -266,6 +336,10 @@ public class SearchReview {
         }
     }
 
+    /**
+     * Asks the user to search for reviews within a specific date range and displays the results.
+     * @param scanner The scanner to read user input
+     */
     public static void searchByDateRange(Scanner scanner)
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -302,7 +376,7 @@ public class SearchReview {
 
                 if (likeChoice)
                 {
-                    ReviewManager.getInstance().likeReviewMenu();
+                    ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
 
@@ -314,6 +388,10 @@ public class SearchReview {
         System.out.println("Returning to main menu...");
     }
 
+    /**
+     * Asks the user to search for reviews by username of the reviewer and displays the results.
+     * @param scanner The scanner to read user input
+     */
     public static void searchByUsername(Scanner scanner)
     {
         while (true)
@@ -338,7 +416,7 @@ public class SearchReview {
 
                 if (likeChoice)
                 {
-                    ReviewManager.getInstance().likeReviewMenu();
+                    ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
 
@@ -347,5 +425,4 @@ public class SearchReview {
             if (!again.equalsIgnoreCase("y")) break;
         }
     }
-
 }

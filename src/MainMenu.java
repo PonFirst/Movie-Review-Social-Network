@@ -1,18 +1,34 @@
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Scanner;
 
+/**
+ * MainMenu class acts as a dispatcher for user interactions once authenticated.
+ * It displays the main meny which is all available interactions in the program.
+ * It calls methods from other classes such as ReviewManager, UserGraphManager,
+ * and AuthenticationManager to perform actions like writing reviews, managing follows,
+ * searching for reviews, logging in, and logging out.
+ */
 public class MainMenu
 {
-    private static MainMenu instance;
-    private AuthenticationManager authManager;
+    private static MainMenu instance; // Singleton instance of MainMenu
+    private AuthenticationManager authManager; // AuthManager instance to handle authentication
+    private Scanner scanner; // Single Scanner instance for the application
 
+    /**
+     * Private constructor to prevent instantiation from outside the class.
+     * Initializes the AuthenticationManager instance.
+     */
     private MainMenu()
     {
         authManager = AuthenticationManager.getInstance();
+        scanner = new Scanner(System.in);
     }
 
+    /**
+     * Returns the singleton instance of MainMenu.
+     * If the instance doesn't exist, it initializes it.
+     *
+     * @return the singleton instance of MainMenu
+     */
     public static MainMenu getInstance()
     {
         if (instance == null)
@@ -22,17 +38,17 @@ public class MainMenu
         return instance;
     }
 
-
+    /**
+     * Displays the main menu to the user and handles the user input.
+     * Delegates actions to the appropriate classes based on the menu choice.
+     */
     public void displayMainMenu()
     {
-        Scanner scanner = new Scanner(System.in);
-
         if (!authManager.isUserLoggedIn())
         {
             displayAuthMenu();
         }
         User currentUser = authManager.getCurrentUser();
-
 
         System.out.println();
         System.out.println("1. Write Movie Review");
@@ -45,28 +61,29 @@ public class MainMenu
         System.out.println("8. Logout");
         System.out.println("9. Exit");
 
+        // Get validated user input
         int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
         System.out.println();
 
         switch (option)
         {
             case 1:
-                ReviewManager.getInstance().addReviewMenu(currentUser.getUserID());
+                ReviewManager.getInstance().addReviewMenu(currentUser.getUserID(), scanner);
                 break;
             case 2:
-                ReviewManager.getInstance().editReviewMenu(currentUser.getUserName());
+                ReviewManager.getInstance().editReviewMenu(currentUser.getUserName(), scanner);
                 break;
             case 3:
-                ReviewManager.getInstance().deleteReviewMenu(currentUser.getUserName());
+                ReviewManager.getInstance().deleteReviewMenu(currentUser.getUserName(), scanner);
                 break;
             case 4:
                 searchReviewMenu(scanner);
                 break;
             case 5:
-                UserGraphManager.getInstance().followUser();
+                UserGraphManager.getInstance().followUser(scanner);
                 break;
             case 6:
-                UserGraphManager.getInstance().unfollowUser();
+                UserGraphManager.getInstance().unfollowUser(scanner);
                 break;
             case 7:
                 UserGraphManager.getInstance().followRecomendations();
@@ -76,7 +93,7 @@ public class MainMenu
                 break;
             case 9:
                 Database.getInstance().disconnect();
-                Graph.getInstance().disconnect();;
+                Graph.getInstance().disconnect();
                 System.exit(0);
                 break;
             case 10:
@@ -88,9 +105,11 @@ public class MainMenu
         }
     }
 
+    /**
+     * Displays the authentication menu for login, registration, or exit.
+     */
     public void displayAuthMenu()
     {
-        Scanner scanner = new Scanner(System.in);
         while (true)
         {
             System.out.println("Authentication Menu:");
@@ -132,6 +151,12 @@ public class MainMenu
         }
     }
 
+    /**
+     * Displays a sub menu for different ways to search reviews.
+     * Delegates to SearchReview methods based on the user's search input.
+     *
+     * @param scanner the Scanner object used for input
+     */
     private void searchReviewMenu(Scanner scanner)
     {
         while (true)
