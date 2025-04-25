@@ -4,12 +4,22 @@ import java.util.Objects;
 
 public class User
 {
-    private int userID;
-    private String username;
-    private String email;
-    private String password;
-    private ArrayList<Genre.GenreType> genres;
+    private int userID;         // Unique identifier for the user
+    private String username;    // The username of the user
+    private String email;       // The email of the user
+    private String password;    // The password of the user
+    private ArrayList<Genre.GenreType> genres;  // The user's favorite genres
 
+    /**
+     * Constructs a User object
+     * Initializes the genres list to an empty list if null is provided.
+     *
+     * @param userID   the unique identifier for the user
+     * @param username the username of the user
+     * @param email    the email address of the user
+     * @param password the password of the user
+     * @param genres   the list of favorite genres, or null to initialize an empty list
+     */
     public User(int userID, String username, String email, String password, ArrayList<Genre.GenreType> genres)
     {
         this.userID = userID;
@@ -19,66 +29,111 @@ public class User
         this.genres = genres != null ? genres : new ArrayList<>();
     }
 
-
+    /**
+     * Get the user's ID
+     * @return the user ID
+     */
     public int getUserID()
     {
         return userID;
     }
 
+    /**
+     * Sets the user's ID
+     * @param userID the new user ID
+     */
     public void setUserID(int userID)
     {
         this.userID = userID;
     }
 
+    /**
+     * Get the user's username
+     * @return the username
+     */
     public String getUserName()
     {
         return username;
     }
 
+    /**
+     * Sets the user's username
+     * @param username the new username
+     */
     public void setUserName(String username)
     {
         this.username = username;
     }
 
+    /**
+     * Get the user's email address
+     * @return the email address
+     */
     public String getEmail()
     {
         return email;
     }
 
+    /**
+     * Sets the user's email address
+     * @param email the new email address
+     */
     public void setEmail(String email)
     {
         this.email = email;
     }
 
+    /**
+     * Get the user's password
+     * @return the password
+     */
     public String getPassword()
     {
         return password;
     }
 
+    /**
+     * Sets the user's password
+     * @param password the new password
+     */
     public void setPassword(String password)
     {
         this.password = password;
     }
 
+    /**
+     * Get the list of the user's favorite genres
+     * @return the list of favorite genres
+     */
     public ArrayList<Genre.GenreType> getFavoriteGenres()
     {
         return genres;
     }
 
+    /**
+     * Sets the list of the user's favorite genres
+     * @param genres the new list of favorite genres
+     */
     public void setFavoriteGenres(ArrayList<Genre.GenreType> genres)
     {
         this.genres = genres;
     }
 
+    /**
+     * Checks if a username is already taken in the database
+     * @param username the username to check
+     * @return true if the username is taken, false otherwise
+     */
     public static boolean isUsernameTaken(String username)
     {
         try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT 1 FROM users WHERE username = ?"))
+             PreparedStatement statement = conn.prepareStatement("SELECT 1 FROM users WHERE username = ?"))
         {
-            stmt.setString(1, username);
-            return stmt.executeQuery().next(); // returns true if username exists
-
-        } catch (SQLException e) {
+            statement.setString(1, username);
+            return statement.executeQuery().next(); // returns true if username exists
+        }
+        catch (SQLException e)
+        {
             System.err.println("Failed to check username: " + e.getMessage());
             return true;
         }
@@ -86,7 +141,8 @@ public class User
 
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
@@ -98,13 +154,17 @@ public class User
         return Objects.hash(getUserID());
     }
 
-
+    /**
+     * Saves the user's data and favorite genres to the database.
+     * Inserts the user record and genres into their tables
+     */
     public void save()
     {
         Connection conn = Database.getInstance().getConnection();
         String query = "INSERT INTO users (userID, username, email, password) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement statement = conn.prepareStatement(query)) {
+        try (PreparedStatement statement = conn.prepareStatement(query))
+        {
             statement.setInt(1, this.userID);
             statement.setString(2, this.username);
             statement.setString(3, this.email);
@@ -112,68 +172,22 @@ public class User
             statement.executeUpdate();
 
             // Save each genre
-            for (Genre.GenreType genre : this.genres) {
+            for (Genre.GenreType genre : this.genres)
+            {
                 String genreQuery = "INSERT INTO UserGenres (userID, genre) VALUES (?, ?)";
-                try (PreparedStatement genreStatement = conn.prepareStatement(genreQuery)) {
+                try (PreparedStatement genreStatement = conn.prepareStatement(genreQuery))
+                {
                     genreStatement.setInt(1, this.userID);
                     genreStatement.setString(2, genre.name());
                     genreStatement.executeUpdate();
                 }
             }
             System.out.println("User and genres saved to database.");
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("User save failed: " + e.getMessage());
         }
-    }
-
-
-
-    public static ArrayList<User> load()
-    {
-        ArrayList<User> users = new ArrayList<>();
-        Connection connection = Database.getInstance().getConnection();
-        String query = "SELECT * FROM users";
-
-        try (PreparedStatement statement = connection.prepareStatement(query))
-        {
-            ResultSet resultSet = statement.executeQuery();
-
-            while (resultSet.next())
-            {
-                int userID = resultSet.getInt("userID");
-                String username = resultSet.getString("username");
-                String email = resultSet.getString("email");
-                String password = resultSet.getString("password");
-
-                // Load genres for the user
-                ArrayList<Genre.GenreType> genres = new ArrayList<>();
-                String genreQuery = "SELECT genre FROM UserGenres WHERE userID = ?";
-                try (PreparedStatement genreStatement = connection.prepareStatement(genreQuery))
-                {
-                    genreStatement.setInt(1, userID);
-                    ResultSet genreResultSet = genreStatement.executeQuery();
-                    while (genreResultSet.next())
-                    {
-                        try
-                        {
-                            genres.add(Genre.GenreType.valueOf(genreResultSet.getString("genre")));
-                        }
-                        catch (IllegalArgumentException e)
-                        {
-                            System.err.println("Invalid genre in database.");
-                        }
-                    }
-                }
-
-                users.add(new User(userID, username, email, password, genres));
-            }
-        }
-        catch (SQLException exception)
-        {
-            System.err.println("Failed to load users: " + exception.getMessage());
-        }
-
-        return users;
     }
 
 
@@ -181,9 +195,9 @@ public class User
     {
         Connection conn = Database.getInstance().getConnection();
         String query = "SELECT MAX(userID) AS max_id FROM users";
-        try (PreparedStatement stmt = conn.prepareStatement(query))
+        try (PreparedStatement statement = conn.prepareStatement(query))
         {
-            ResultSet result = stmt.executeQuery();
+            ResultSet result = statement.executeQuery();
             if (result.next())
             {
                 return result.getInt("max_id") + 1;
@@ -201,9 +215,9 @@ public class User
     {
         Connection conn = Database.getInstance().getConnection();
         String query = "SELECT * FROM Reviews WHERE userID = ? ORDER BY reviewDate DESC LIMIT 1";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, this.userID);
-            ResultSet resultSet = stmt.executeQuery();
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setInt(1, this.userID);
+            ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return new Review(
                         resultSet.getInt("reviewID"),
@@ -220,69 +234,7 @@ public class User
         }
         return null;
     }
-    
- /* 
-    private void printLatestReviews(User targetUser) {
-        Connection conn = Database.getInstance().getConnection();
-        
-        // Query for latest reviews
-        String query = "SELECT " +
-        "r.reviewID, " +
-        "r.movieID, " +
-        "r.content, " +
-        "r.rating, " +
-        "r.reviewDate, " +
-        "r.likeCount, " +
-        "m.title " +
-        "FROM Reviews r " +
-        "JOIN Movies m ON r.movieID = m.id " +
-        "WHERE r.userID = ? " +
-        "ORDER BY r.reviewDate DESC " +
-        "LIMIT 3";
-    
-        try (PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setInt(1, targetUser.getUserID());
-            ResultSet resultSet = statement.executeQuery();
-            
-            System.out.println("\nLatest Reviews:");
-            
-            boolean hasReviews = false;
-            while (resultSet.next()) {
-                hasReviews = true;
-                
-                int reviewId = resultSet.getInt("reviewID");
-                int movieID = resultSet.getInt("movieID");
-                String text = resultSet.getString("content");
-                int rating = resultSet.getInt("rating");
-                Date reviewDate = resultSet.getDate("reviewDate");
-                int likeCount = resultSet.getInt("likeCount");
-                String movieTitle = resultSet.getString("title");
-                
-                // Truncate text to first 50 characters
-                String truncatedText = text.length() > 50 
-                    ? text.substring(0, 50) + "..." 
-                    : text;
-                
-                // Print review details
-                System.out.println("---");
-                System.out.println("Movie: " + movieTitle);
-                System.out.println("Rating: " + rating);
-                System.out.println("Review Date: " + reviewDate);
-                System.out.println("Likes: " + likeCount);
-                System.out.println("Review: " + truncatedText);
-            }
-            
-            if (!hasReviews) {
-                System.out.println("No reviews yet.");
-            }
-            
-        } catch (SQLException e) {
-            // Handle any SQL exceptions
-            System.err.println("Error retrieving reviews: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-*/
+
 
     public void displayProfile() {
         // Print user profile information

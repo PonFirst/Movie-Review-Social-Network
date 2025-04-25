@@ -10,8 +10,8 @@ import java.util.Scanner;
  */
 public class ReviewManager
 {
-    private static ReviewManager instance;  //
-    private ArrayList<Review> reviews;
+    private static ReviewManager instance;  // // Singleton instance of ReviewManager
+    private ArrayList<Review> reviews;  // List of reviews
 
     /**
      * Private constructor to initialize the reviews list.
@@ -99,6 +99,15 @@ public class ReviewManager
         return selectedMovie;
     }
 
+    /**
+     * Get a specific review from a user's review list based. It also
+     * displays the user's reviews and prompts for a review ID to select.
+     *
+     * @param username the username of the user whose reviews are to be searched
+     * @param scanner the Scanner object used for user input
+     * @param action the action to be performed on the review
+     * @return the selected Review object, or null if no review is selected or the process is canceled
+     */
     private Review selectReview(String username, Scanner scanner, String action)
     {
         ArrayList<Review> userReviews = SearchReview.findReviewsByUsername(username);
@@ -132,6 +141,7 @@ public class ReviewManager
     /**
      * Handles the process of adding a new review for a selected movie.
      * @param userID The ID of the user adding the review
+     * @param scanner the Scanner object used for user input
      */
     public void addReviewMenu(int userID, Scanner scanner)
     {
@@ -179,6 +189,12 @@ public class ReviewManager
         }
     }
 
+    /**
+     * Allows the user to edit an existing review by selecting a review and updating its rating or text.
+     * It also asks the user to confirm changes before saving.
+     * @param username the username of the user whose review is to be edited
+     * @param scanner the Scanner object used for user input
+     */
     public void editReviewMenu(String username, Scanner scanner)
     {
         Review selectedReview = selectReview(username, scanner, "edit");
@@ -218,8 +234,12 @@ public class ReviewManager
         }
     }
 
-
-
+    /**
+     * Allows the user to delete an existing review by selecting a
+     * review and confirming deletion.
+     * @param username the username of the user whose review is to be deleted
+     * @param scanner the Scanner object used for user input
+     */
     public void deleteReviewMenu(String username, Scanner scanner)
     {
         Review selectedReview = selectReview(username, scanner, "delete");
@@ -244,8 +264,11 @@ public class ReviewManager
         }
     }
 
-
-
+    /**
+     * Allows the user to like a review by entering its ID.
+     * Validates the review ID and increments the review’s like count if valid.
+     * @param scanner the Scanner object used for user input
+     */
     public void likeReviewMenu(Scanner scanner)
     {
         int reviewID = InputValidator.getValidatedInt(scanner, "Enter Review ID to like: ");
@@ -260,10 +283,17 @@ public class ReviewManager
         review.likeReview();
     }
 
+    /**
+     * Displays a list of reviews for a given user, showing a summary of each review.
+     * Includes review ID, movie title, rating, and a text snippet.
+     * @param username the name of the user whose reviews will be shown
+     * @param userReviews the list of reviews to display
+     */
     void displayReviewList(String username, ArrayList<Review> userReviews)
     {
         System.out.println("Reviews for " + username + ":");
-        for (Review review : userReviews) {
+        for (Review review : userReviews)
+        {
             String textSnippet = review.getText().length() > 50 ? review.getText().substring(0, 50) + "..." : review.getText();
 
             System.out.println("Review ID: " + review.getReviewID());
