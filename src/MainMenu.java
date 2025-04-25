@@ -149,137 +149,17 @@ public class MainMenu
             switch (choice)
             {
                 case 1:
-                    while (true) {
-                        System.out.print("Enter Movie Title: ");
-                        String movieTitle = scanner.nextLine();
-                        System.out.println();
-
-                        ArrayList<Review> reviews = SearchReview.findReviewsByMovie(movieTitle);
-
-                        if (reviews.isEmpty()) {
-                            System.out.println("No reviews found for movies matching: " + movieTitle);
-                        } else {
-                            System.out.println("Reviews for: " + movieTitle);
-                            for (Review review : reviews) {
-                                System.out.println(review);
-                            }
-                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
-                            if (likeChoice)
-                            {
-                                ReviewManager.getInstance().likeReviewMenu();
-                            }
-                        }
-
-                        System.out.print("Do you want to search another movie? (y/n): ");
-                        String again = scanner.nextLine();
-                        if (!again.equalsIgnoreCase("y")) break;
-                    }
+                    SearchReview.searchByMovieTitle(scanner);
                     break;
                 case 2:
-                    while (true) {
-                        System.out.print("Enter Genre: ");
-                        String genre = scanner.nextLine();
-
-                        ArrayList<Review> reviews = SearchReview.findReviewsByGenre(genre);
-
-                        if (reviews == null)
-                        {
-                            System.out.print("Do you want to try another genre? (y/n): ");
-                            String again = scanner.nextLine();
-                            if (!again.equalsIgnoreCase("y")) break;
-                            continue;
-                        }
-
-                        if (reviews.isEmpty())
-                        {
-                            System.out.println("No reviews found for genre: " + genre);
-                        } else {
-                            System.out.println("Reviews in Genre: " + genre);
-                            for (Review review : reviews) {
-                                System.out.println(review);
-                            }
-                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
-                            if (likeChoice)
-                            {
-                                ReviewManager.getInstance().likeReviewMenu();
-                            }
-                        }
-
-                        System.out.print("Do you want to search another genre? (y/n): ");
-                        String again = scanner.nextLine();
-                        if (!again.equalsIgnoreCase("y")) break;
-                    }
+                    SearchReview.searchByGenre(scanner);
                     break;
-
                 case 3:
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    dateFormat.setLenient(false);
-
-                    while (true) {
-                        Date startDate = InputValidator.readValidDate("Enter Start Review Date (YYYY-MM-DD): ", scanner, dateFormat);
-                        Date endDate = InputValidator.readValidDate("Enter End Review Date (YYYY-MM-DD): ", scanner, dateFormat);
-
-                        // Validate date range
-                        if (startDate.after(endDate)) {
-                            System.out.println("Start date must be before or equal to end date. Try again.");
-                            continue;
-                        }
-
-                        // Search and display reviews
-                        ArrayList<Review> reviewsInRange = SearchReview.findReviewsByDateRange(startDate, endDate);
-                        String startStr = dateFormat.format(startDate);
-                        String endStr = dateFormat.format(endDate);
-
-                        if (reviewsInRange.isEmpty()) {
-                            System.out.println("No reviews found between " + startStr + " and " + endStr + ".");
-                        } else {
-                            System.out.println("Reviews from " + startStr + " to " + endStr + ":");
-                            for (Review review : reviewsInRange) {
-                                System.out.println(review);
-                            }
-                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
-                            if (likeChoice)
-                            {
-                                ReviewManager.getInstance().likeReviewMenu();
-                            }
-                        }
-
-                        // Ask if user wants to continue
-                        System.out.print("Do you want to search another date range? (y/n): ");
-                        String continueSearch = scanner.nextLine().trim();
-                        if (!continueSearch.equalsIgnoreCase("y")) break;
-                    }
-
-                    System.out.println("Returning to main menu...");
+                    SearchReview.searchByDateRange(scanner);
                     break;
-
-
                 case 4:
-                    while (true) {
-                        System.out.print("Enter Username: \n");
-                        String username = scanner.nextLine();
-
-                        ArrayList<Review> reviews = SearchReview.findReviewsByUsername(username);
-                        if (reviews.isEmpty()) {
-                            System.out.println("No reviews found for user: " + username);
-                        } else {
-                            System.out.println("Reviews by user: " + username);
-                            for (Review review : reviews) {
-                                System.out.println(review);
-                            }
-                            boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
-                            if (likeChoice)
-                            {
-                                ReviewManager.getInstance().likeReviewMenu();
-                            }
-                        }
-
-                        System.out.print("Do you want to search another user? (y/n): ");
-                        String again = scanner.nextLine();
-                        if (!again.equalsIgnoreCase("y")) break;
-                    }
+                    SearchReview.searchByUsername(scanner);
                     break;
-
                 case 5:
                     return;
                 default:
