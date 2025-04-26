@@ -122,97 +122,83 @@ public class UserGraphManager{
 
 
 
-/**
- * Recommends users to follow based on multiple criteria in priority order:
- * 1. Users whose latest reviews are on movies you've liked
- * 2. Users whose latest reviews are on movies in your favorite genres
- * 3. Users who are followed by users you follow (friends of friends)
- */
-public void followRecomendations() {
-    User currentUser = AuthenticationManager.getInstance().getCurrentUser();
-    if (currentUser == null) {
-        System.out.println("You need to be logged in to see recommendations.");
-        return;
-    }
-    
-    // Set to track unique recommended users to avoid duplicates
-    Set<User> uniqueRecommendations = new HashSet<>();
-    
-    // 1. First find users by liked reviews (highest priority)
-    ArrayList<User> likedReviewUsers = findUsersByLikedReviews(currentUser);
-    for (User user : likedReviewUsers) {
-        uniqueRecommendations.add(user);
-    }
-    
-    // 2. Then fill in with users who review movies in your favorite genres
-    if (uniqueRecommendations.size() < 5) {
-        ArrayList<User> genreUsers = findUsersByFavoriteGenres(currentUser);
-        for (User user : genreUsers) {
-            // Only add if we haven't reached 5 recommendations yet
-            if (uniqueRecommendations.size() < 5) {
-                uniqueRecommendations.add(user);
+    /**
+     * Recommends users to follow based on multiple criteria in priority order:
+     * 1. Users who have written reviews of movies in categories similar to ones you've liked
+     * 2. Users who are followed by users you follow (friends of friends)
+     */
+    public void followRecomendations() {
+        User currentUser = AuthenticationManager.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            System.out.println("You need to be logged in to see recommendations.");
+            return;
+        }
+        
+        // Set to track unique recommended users to avoid duplicates
+        Set<User> uniqueRecommendations = new HashSet<>();
+        
+        // 1. First find users who have reviewed movies in categories similar to ones you've liked
+        ArrayList<User> similarCategoryUsers = recommendUsersBySimilarCategories(currentUser);
+        for (User user : similarCategoryUsers) {
+            uniqueRecommendations.add(user);
+        }
+        
+        // 2. Fill any remaining spots with friends of friends
+        if (uniqueRecommendations.size() < 5) {
+            List<User> friendsOfFriends = Graph.getInstance().getFriendsOfFriendsNotConnected(currentUser);
+            for (User user : friendsOfFriends) {
+                // Only add if we haven't reached 5 recommendations yet
+                if (uniqueRecommendations.size() < 5) {
+                    uniqueRecommendations.add(user);
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // Convert to list for ordered display
+        List<User> recommendedUsers = new ArrayList<>(uniqueRecommendations);
+        
+        // Check if we found any recommendations
+        if (recommendedUsers.isEmpty()) {
+            System.out.println("No user recommendations available at this time.");
+            return;
+        }
+        
+        // Print the recommendation source info once
+        System.out.println("\n--- Recommended Users to Follow ---");
+        System.out.println("(Based on similar movie categories and network connections)");
+        
+        // Display the recommended users with their details
+        for (int i = 0; i < recommendedUsers.size(); i++) {
+            User user = recommendedUsers.get(i);
+            
+            System.out.println("\n" + (i+1) + ". " + user.getUserName());
+            
+            // Show their favorite genres
+            System.out.print("   Favorite Genres: ");
+            List<Genre.GenreType> genres = user.getFavoriteGenres();
+            if (genres.isEmpty()) {
+                System.out.print("None specified");
             } else {
-                break;
+                for (int j = 0; j < genres.size(); j++) {
+                    System.out.print(genres.get(j).toString().replace("_", " "));
+                    if (j < genres.size() - 1) System.out.print(", ");
+                }
             }
-        }
-    }
-    
-    // 3. Finally, fill in with friends of friends
-    if (uniqueRecommendations.size() < 5) {
-        List<User> friendsOfFriends = Graph.getInstance().getFriendsOfFriendsNotConnected(currentUser);
-        for (User user : friendsOfFriends) {
-            // Only add if we haven't reached 5 recommendations yet
-            if (uniqueRecommendations.size() < 5) {
-                uniqueRecommendations.add(user);
+            System.out.println();
+            
+            // Show their latest review if they have one
+            Review latestReview = user.getLatestReview();
+            if (latestReview != null) {
+                System.out.println("   Latest Review:");
+                System.out.print("   ");
+                System.out.print(latestReview); // Using the Review's toString() method that includes truncation
             } else {
-                break;
+                System.out.println("   No reviews yet");
             }
         }
     }
-    
-    // Convert to list for ordered display
-    List<User> recommendedUsers = new ArrayList<>(uniqueRecommendations);
-    
-    // Check if we found any recommendations
-    if (recommendedUsers.isEmpty()) {
-        System.out.println("No user recommendations available at this time.");
-        return;
-    }
-    
-    // Print the recommendation source info once
-    System.out.println("\n--- Recommended Users to Follow ---");
-    System.out.println("(Based on your liked reviews, favorite genres, and network connections)");
-    
-    // Display the recommended users with their details
-    for (int i = 0; i < recommendedUsers.size(); i++) {
-        User user = recommendedUsers.get(i);
-        
-        System.out.println("\n" + (i+1) + ". " + user.getUserName());
-        
-        // Show their favorite genres
-        System.out.print("   Favorite Genres: ");
-        List<Genre.GenreType> genres = user.getFavoriteGenres();
-        if (genres.isEmpty()) {
-            System.out.print("None specified");
-        } else {
-            for (int j = 0; j < genres.size(); j++) {
-                System.out.print(genres.get(j).toString().replace("_", " "));
-                if (j < genres.size() - 1) System.out.print(", ");
-            }
-        }
-        System.out.println();
-        
-        // Show their latest review if they have one
-        Review latestReview = user.getLatestReview();
-        if (latestReview != null) {
-            System.out.println("   Latest Review:");
-            System.out.print("   ");
-            System.out.print(latestReview); // Using the Review's toString() method that includes truncation
-        } else {
-            System.out.println("   No reviews yet");
-        }
-    }
-}
 
 
 /*
@@ -260,155 +246,117 @@ public void followRecomendations() {
 
 
     /**
-     * Finds users whose latest reviews are on the same movies you recently liked
-     * using string concatenation for queries
+     * Recommends users who have written reviews for movies in categories similar 
+     * to the categories of movies the current user has liked
+     * 
      * @param currentUser The currently logged in user
-     * @return ArrayList of up to 5 users whose reviews match your recently liked content
+     * @return ArrayList of up to 5 recommended users who have reviewed movies in categories similar to your liked movies
      */
-    public ArrayList<User> findUsersByLikedReviews(User currentUser) {
+    public ArrayList<User> recommendUsersBySimilarCategories(User currentUser) {
         ArrayList<User> recommendedUsers = new ArrayList<>();
         
         try {
-            // 1. Find the 5 most recent reviews the current user has liked
-            String likedReviewsQuery = 
-                "SELECT r.movieID " +
+            // 1. Find the genres of movies the current user has liked reviews for
+            String likedGenresQuery = 
+                "SELECT DISTINCT m.genres " +
                 "FROM Likes l " +
                 "JOIN Reviews r ON l.reviewID = r.reviewID " +
-                "WHERE l.userID = " + currentUser.getUserID() + " " +
-                "ORDER BY l.likeID DESC " + // Using likeID as a chronological identifier takign advantage of auto-incrementing primary key
-                "LIMIT 5";
+                "JOIN Movies m ON r.movieID = m.id " +
+                "WHERE l.userID = " + currentUser.getUserID();
                 
-            ResultSet likedReviewsRS = Database.getInstance().executeQuery(likedReviewsQuery);
+            ResultSet likedGenresRS = Database.getInstance().executeQuery(likedGenresQuery);
             
-            StringBuilder movieIDList = new StringBuilder();
-            boolean hasMovies = false;
-            
-            while (likedReviewsRS.next()) {
-                if (hasMovies) {
-                    movieIDList.append(", ");
+            Set<String> likedGenres = new HashSet<>();
+            while (likedGenresRS.next()) {
+                String genre = likedGenresRS.getString("genres");
+                if (genre != null && !genre.isEmpty()) {
+                    // Some movies might have multiple genres stored as a string
+                    // We'll split them if necessary
+                    if (genre.contains(",")) {
+                        String[] genreParts = genre.split(",");
+                        for (String part : genreParts) {
+                            likedGenres.add(part.trim());
+                        }
+                    } else {
+                        likedGenres.add(genre.trim());
+                    }
                 }
-                movieIDList.append(likedReviewsRS.getInt("movieID"));
-                hasMovies = true;
+            }
+            likedGenresRS.close();
+            
+            // If user hasn't liked any reviews, try to use their favorite genres
+            if (likedGenres.isEmpty()) {
+                for (Genre.GenreType genre : currentUser.getFavoriteGenres()) {
+                    likedGenres.add(genre.name());
+                }
             }
             
-            // Close the ResultSet
-            likedReviewsRS.close();
-            
-            // If user hasn't liked any reviews, return empty list
-            if (!hasMovies) {
-                System.out.println("No liked reviews found to base recommendations on.");
+            // If still no genres to work with, return empty list
+            if (likedGenres.isEmpty()) {
+                System.out.println("No genre preferences found to base recommendations on.");
                 return recommendedUsers;
             }
             
-            // 2. Find users who have recently reviewed these movies (excluding the current user)
+            // 2. Find users who have written reviews for movies in similar genres
+            // but exclude users the current user is already following
+            
+            // First, get the list of users the current user is following
+            List<User> following = Graph.getInstance().getFollowing(currentUser);
+            StringBuilder excludeUsers = new StringBuilder();
+            excludeUsers.append(currentUser.getUserID()); // Exclude current user
+            
+            for (User followedUser : following) {
+                excludeUsers.append(",").append(followedUser.getUserID());
+            }
+            
+            // Build the genre condition
+            StringBuilder genreCondition = new StringBuilder();
+            int genreCount = 0;
+            for (String genre : likedGenres) {
+                if (genreCount > 0) genreCondition.append(" OR ");
+                genreCondition.append("m.genres LIKE '%").append(genre).append("%'");
+                genreCount++;
+            }
+            
             String usersQuery = 
-                "SELECT DISTINCT u.userID, u.username, r.movieID, " +
-                "m.title AS movieTitle " +
-                "FROM users u " +
-                "JOIN reviews r ON u.userID = r.userID " +
-                "JOIN movies m ON r.movieID = m.id " +
-                "WHERE r.movieID IN (" + movieIDList.toString() + ") " +
-                "AND u.userID != " + currentUser.getUserID() + " " +
-                "AND r.reviewID IN (" +
-                "    SELECT r2.reviewID FROM reviews r2 " +
-                "    WHERE r2.userID = u.userID " +
-                "    ORDER BY r2.reviewDate DESC LIMIT 1" +
-                ") " +
-                "ORDER BY r.reviewDate DESC";
+                "SELECT DISTINCT u.userID, u.username, " +
+                "COUNT(r.reviewID) as reviewCount " +
+                "FROM Users u " +
+                "JOIN Reviews r ON u.userID = r.userID " +
+                "JOIN Movies m ON r.movieID = m.id " +
+                "WHERE (" + genreCondition.toString() + ") " +
+                "AND u.userID NOT IN (" + excludeUsers.toString() + ") " +
+                "GROUP BY u.userID " +
+                "ORDER BY reviewCount DESC " +
+                "LIMIT 5";
                 
             ResultSet usersRS = Database.getInstance().executeQuery(usersQuery);
             
+            System.out.println("Finding users who review movies in categories you enjoy...");
+            
             while (usersRS.next() && recommendedUsers.size() < 5) {
                 int userID = usersRS.getInt("userID");
-                String movieTitle = usersRS.getString("movieTitle");
+                String username = usersRS.getString("username");
                 
                 // Get user object
                 User user = Graph.getInstance().getUserByKey(userID);
-                if (user != null && !recommendedUsers.contains(user)) {
+                
+                // Double-check that we're not recommending users the current user already follows
+                if (user != null && !Graph.getInstance().isFollowing(currentUser, user) && !user.equals(currentUser)) {
                     recommendedUsers.add(user);
                     
-                    // Optional: Print debug information
-                    System.out.println("Recommending user " + user.getUserName() + 
-                                    " who recently reviewed " + movieTitle);
+                    // Optional: Print debug info
+                    System.out.println("Recommending user " + username + 
+                                    " who reviews movies in categories you like");
                 }
             }
             
-            // Close the ResultSet
             usersRS.close();
             
         } catch (SQLException e) {
-            System.err.println("Error finding users by liked reviews: " + e.getMessage());
+            System.err.println("Error recommending users by similar categories: " + e.getMessage());
         }
         
         return recommendedUsers;
     }
-
-    /**
-     * Finds users whose latest reviews are on movies in your favorite genres
-     * using string concatenation for the query
-     * @param currentUser The currently logged in user
-     * @return ArrayList of up to 5 users whose latest reviews match your genre preferences
-     */
-    public ArrayList<User> findUsersByFavoriteGenres(User currentUser) {
-        ArrayList<User> recommendedUsers = new ArrayList<>();
-        
-        try {
-            // 1. Get current user's favorite genres
-            List<Genre.GenreType> favoriteGenres = currentUser.getFavoriteGenres();
-            
-            // If user has no favorite genres, return empty list
-            if (favoriteGenres.isEmpty()) {
-                System.out.println("No favorite genres found to base recommendations on.");
-                return recommendedUsers;
-            }
-            
-            // 2. Build SQL condition for favorite genres
-            StringBuilder genreCondition = new StringBuilder();
-            for (int i = 0; i < favoriteGenres.size(); i++) {
-                if (i > 0) genreCondition.append(" OR ");
-                // Directly embed the genre name in the SQL
-                genreCondition.append("m.genres LIKE '%" + favoriteGenres.get(i).name() + "%'");
-            }
-            
-            // 3. Create the complete SQL query with all values embedded
-            String usersQuery = 
-                "SELECT DISTINCT u.userID, u.username, m.title AS movieTitle, m.genres " +
-                "FROM users u " +
-                "JOIN reviews r ON u.userID = r.userID " +
-                "JOIN movies m ON r.movieID = m.id " +
-                "WHERE (" + genreCondition.toString() + ") " +
-                "AND u.userID != " + currentUser.getUserID() + " " +
-                "AND r.reviewID IN (" +
-                "    SELECT r2.reviewID FROM reviews r2 " +
-                "    WHERE r2.userID = u.userID " +
-                "    ORDER BY r2.reviewDate DESC LIMIT 1" +
-                ") " +
-                "ORDER BY r.reviewDate DESC " +
-                "LIMIT 5";
-                
-            // Execute the query directly
-            ResultSet rs = Database.getInstance().executeQuery(usersQuery);
-            
-            // Process results
-            while (rs.next()) {
-                int userID = rs.getInt("userID");
-                
-                // Get user object
-                User user = Graph.getInstance().getUserByKey(userID);
-                if (user != null && !recommendedUsers.contains(user)) {
-                    recommendedUsers.add(user);
-                }
-            }
-            
-            // Close the ResultSet
-            rs.close();
-            
-        } catch (SQLException e) {
-            System.err.println("Error finding users by favorite genres: " + e.getMessage());
-        }
-        
-        return recommendedUsers;
-    }
-
-
 }
