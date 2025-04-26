@@ -83,9 +83,11 @@ public class SearchReview
         {
             for (Movie movie : matchedMovies)
             {
-                int movieId = movie.getMovieID(); // Assuming Movie has a getId() method
+                int movieId = movie.getMovieID();
                 String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
-                            "FROM reviews r WHERE r.movieID = " + movieId;
+                "FROM reviews r WHERE r.movieID = " + movieId + 
+                " ORDER BY r.reviewDate DESC LIMIT 2";
+   
 
                 ResultSet rs = Database.getInstance().executeQuery(sql);
                 while (rs.next())

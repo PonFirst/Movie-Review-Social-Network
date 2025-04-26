@@ -93,6 +93,12 @@ public class MainMenu
                 break;
             case 9:
                 Graph.getInstance().disconnect();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    System.out.println("Thread was interrupted: " + e.getMessage());
+                    Thread.currentThread().interrupt(); // Restore interrupted status
+                }
                 Database.getInstance().disconnect();
                 scanner.close();
                 System.exit(0);
@@ -143,6 +149,12 @@ public class MainMenu
                     break;
                 case 3:
                     Graph.getInstance().disconnect();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        System.out.println("Thread was interrupted: " + e.getMessage());
+                        Thread.currentThread().interrupt(); // Restore interrupted status
+                    }
                     Database.getInstance().disconnect();
                     scanner.close();
                     System.exit(0);
