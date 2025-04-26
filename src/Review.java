@@ -289,17 +289,27 @@ public class Review
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.ENGLISH);
         dateFormat.setCalendar(new GregorianCalendar());
-
+    
         String formattedDate = dateFormat.format(reviewDate);
         String movieTitle = Movie.getMovieTitleByID(movieID);
-
+        
+        // Truncate the review text if it's too long
+        String displayText = text;
+        int maxLength = 50; // Maximum characters to display
+        boolean truncated = false;
+        
+        if (displayText != null && displayText.length() > maxLength) {
+            displayText = displayText.substring(0, maxLength - 3) + "...";
+            truncated = true;
+        }
+    
         return "Review ID: " + reviewID + "\n" +
                 "Movie: " + movieTitle + " (ID: " + movieID + ")\n" +
                 "User ID: " + userID + "\n" +
                 "Rating: " + rating + "/5\n" +
                 "Likes: " + likeCount + "\n" +
                 "Date: " + formattedDate + "\n" +
-                "Review: " + text + "\n" +
+                "Review: " + displayText + (truncated ? " (truncated)" : "") + "\n" +
                 "--------------------\n";
     }
 }
