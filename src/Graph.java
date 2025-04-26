@@ -4,9 +4,9 @@ import java.sql.*;
 /**
  * A social network graph implementation using HashMaps to store user relationships.
  * Optimized for follower/following relationships between users.
+ * Implements the Singleton pattern to ensure only one graph instance exists.
  */
-public class Graph
-{
+public class Graph {
     // Singleton instance
     private static Graph instance = null;
     
@@ -28,7 +28,6 @@ public class Graph
 
         try {
             // First, load all users from the Users table
-            // Changed to use Database.executeQuery
             String userQuery = "SELECT userID, username, email FROM Users";
             ResultSet resultSet = Database.getInstance().executeQuery(userQuery);
             
@@ -53,7 +52,6 @@ public class Graph
             resultSet.close();
             
             // Now load all follower relationships from UserFollower table
-            // Changed to use Database.executeQuery
             String followerQuery = "SELECT uf.userID, uf.followerID FROM UserFollower uf";
             resultSet = Database.getInstance().executeQuery(followerQuery);
             
@@ -81,12 +79,17 @@ public class Graph
     /**
      * Helper method to create a user object from database fields.
      * Creates a new User object with the data from the database.
+     * 
+     * @param userId User ID from the database
+     * @param username Username from the database
+     * @param email Email from the database
+     * @return A new User object
      */
     private User createUserObject(int userId, String username, String email) {
         // Load genres for this user
         ArrayList<Genre.GenreType> genres = new ArrayList<>();
         try {
-            // Changed to use Database.executeQuery
+            // Query to get user's favorite genres
             String genreQuery = "SELECT genre FROM UserGenres WHERE userID = " + userId;
             ResultSet genreResultSet = Database.getInstance().executeQuery(genreQuery);
             
@@ -105,8 +108,6 @@ public class Graph
         // Note: We're setting password to null since we don't load it from the database
         return new User(userId, username, email, null, genres);
     }
-    
-    // Rest of the methods remain unchanged
     
     /**
      * Gets the singleton instance of the graph
@@ -153,10 +154,11 @@ public class Graph
     }
     
     /**
-     * Removes a user and all their relationships
+     * Removes a follower relationship between users
      * 
-     * @param user the user to remove
-     * @return true if the user was successfully removed, false if the user did not exist
+     * @param follower the user who is following
+     * @param target the user being followed
+     * @return true if the relationship was successfully removed, false if it did not exist
      */
     public boolean removeFollower(User follower, User target) {
         boolean removed = false;
@@ -201,7 +203,6 @@ public class Graph
         return userIndex.get(key);
     }
     
-
     /**
      * Gets a user by username
      * 
@@ -232,7 +233,6 @@ public class Graph
         return following.getOrDefault(user, new ArrayList<>());
     }
     
-
     /**
      * Checks if a user is following another user
      * 
@@ -250,76 +250,6 @@ public class Graph
         }
         return false;
     }
-
-
-    /**
-     * Gets a list of users who are followed by users that the specified user follows,
-     * but who are not directly followed by the specified user.
-     * These are essentially "friends of friends" who have no direct connection.
-     * 
-     * @param user the user for whom to find potential connections
-     * @return a list of users who are followed by user's following but not by user directly
-     */
-    public List<User> getFriendsOfFriendsNotConnected(User user) {
-        if (!following.containsKey(user)) {
-            return new ArrayList<>();
-        }
-        
-        // Get all users that the specified user is following
-        List<User> userFollowing = following.get(user);
-        
-        // Create a set for faster lookup
-        Set<User> result = new HashSet<>();
-        
-        // For each user the specified user follows
-        for (User friend : userFollowing) {
-            if (following.containsKey(friend)) {
-                // Get the users that this friend follows
-                List<User> friendFollowing = following.get(friend);
-                
-                // Add all the friend's following to our result set
-                result.addAll(friendFollowing);
-            }
-        }
-        
-        // Remove the original user from the result (if present)
-        result.remove(user);
-        
-        // Remove users that the original user is already following
-        result.removeAll(userFollowing);
-        
-        // Convert set back to list and return
-        return new ArrayList<>(result);
-    }
-    
-    /**
-     * Prints the latest review from users that the specified user is following.
-     * 
-     * @param user the user whose following list to check
-     */
-    public void printFollowingLatestReviews(User user) {
-        if (!following.containsKey(user)) {
-            return;
-        }
-        
-        List<User> followedUsers = following.get(user);
-        
-
-        // Print the latest reviews from each followed user
-        for (User followedUser : followedUsers) {
-            Review latestReview = followedUser.getLatestReview();
-
-        
-        if (latestReview == null) {
-            //System.out.println(followedUser.getUserName() + " has no reviews.");
-            continue;
-        }
-
-            System.out.println("Latest review from " + followedUser.getUserName() + ":");
-            System.out.print(latestReview);
-        }
-    }
-
     
     /**
      * Gets the number of followers a user has
@@ -330,7 +260,6 @@ public class Graph
     public int getFollowerCount(User user) {
         return followers.getOrDefault(user, Collections.emptyList()).size();
     }
-
 
     /**
      * Gets the number of users a user is following
@@ -400,7 +329,6 @@ public class Graph
      */
     public void disconnect() {
         try {
-            // Changed to use Database.executeUpdate
             // Delete existing relationships
             String deleteQuery = "DELETE FROM UserFollower";
             Database.getInstance().executeUpdate(deleteQuery);
@@ -426,5 +354,4 @@ public class Graph
             e.printStackTrace();
         }
     }
-
 }

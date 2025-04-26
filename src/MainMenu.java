@@ -2,13 +2,12 @@ import java.util.Scanner;
 
 /**
  * MainMenu class acts as a dispatcher for user interactions once authenticated.
- * It displays the main meny which is all available interactions in the program.
+ * It displays the main menu which is all available interactions in the program.
  * It calls methods from other classes such as ReviewManager, UserGraphManager,
  * and AuthenticationManager to perform actions like writing reviews, managing follows,
  * searching for reviews, logging in, and logging out.
  */
-public class MainMenu
-{
+public class MainMenu {
     private static MainMenu instance; // Singleton instance of MainMenu
     private AuthenticationManager authManager; // AuthManager instance to handle authentication
     private Scanner scanner; // Single Scanner instance for the application
@@ -17,8 +16,7 @@ public class MainMenu
      * Private constructor to prevent instantiation from outside the class.
      * Initializes the AuthenticationManager instance.
      */
-    private MainMenu()
-    {
+    private MainMenu() {
         authManager = AuthenticationManager.getInstance();
         scanner = new Scanner(System.in);
     }
@@ -29,10 +27,8 @@ public class MainMenu
      *
      * @return the singleton instance of MainMenu
      */
-    public static MainMenu getInstance()
-    {
-        if (instance == null)
-        {
+    public static MainMenu getInstance() {
+        if (instance == null) {
             instance = new MainMenu();
         }
         return instance;
@@ -41,11 +37,10 @@ public class MainMenu
     /**
      * Displays the main menu to the user and handles the user input.
      * Delegates actions to the appropriate classes based on the menu choice.
+     * Shows different options based on authentication status.
      */
-    public void displayMainMenu()
-    {
-        if (!authManager.isUserLoggedIn())
-        {
+    public void displayMainMenu() {
+        if (!authManager.isUserLoggedIn()) {
             displayAuthMenu();
         }
         User currentUser = authManager.getCurrentUser();
@@ -65,8 +60,7 @@ public class MainMenu
         int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
         System.out.println();
 
-        switch (option)
-        {
+        switch (option) {
             case 1:
                 ReviewManager.getInstance().addReviewMenu(currentUser.getUserID(), scanner);
                 break;
@@ -92,6 +86,7 @@ public class MainMenu
                 authManager.logout();
                 break;
             case 9:
+                // Synchronize graph data with database before exit
                 Graph.getInstance().disconnect();
                 try {
                     Thread.sleep(2000);
@@ -104,6 +99,7 @@ public class MainMenu
                 System.exit(0);
                 break;
             case 10:
+                // Debug option to view the social graph
                 Graph graph = Graph.getInstance();
                 System.out.println(graph);
                 break;
@@ -114,11 +110,10 @@ public class MainMenu
 
     /**
      * Displays the authentication menu for login, registration, or exit.
+     * Handles login, registration and application exit process.
      */
-    public void displayAuthMenu()
-    {
-        while (true)
-        {
+    public void displayAuthMenu() {
+        while (true) {
             System.out.println("Authentication Menu:");
             System.out.println("1. Login");
             System.out.println("2. Register");
@@ -126,21 +121,18 @@ public class MainMenu
 
             int option = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
 
-            switch (option)
-            {
+            switch (option) {
                 case 1:
                     System.out.print("Enter email: ");
                     String email = scanner.nextLine();
                     System.out.print("Enter password: ");
                     String password = scanner.nextLine();
                     System.out.println();
-                    if (authManager.login(email, password))
-                    {
+                    if (authManager.login(email, password)) {
                         UserGraphManager.getInstance().displayLatestReviews();
                         return;
                     }
-                    else 
-                    {
+                    else {
                         System.out.println("Login failed. Please try again.\n");
                     }
                     break;
@@ -148,6 +140,7 @@ public class MainMenu
                     authManager.register();
                     break;
                 case 3:
+                    // Clean disconnect from graph and database
                     Graph.getInstance().disconnect();
                     try {
                         Thread.sleep(2000);
@@ -171,10 +164,8 @@ public class MainMenu
      *
      * @param scanner the Scanner object used for input
      */
-    private void searchReviewMenu(Scanner scanner)
-    {
-        while (true)
-        {
+    private void searchReviewMenu(Scanner scanner) {
+        while (true) {
             System.out.println("Search Reviews By:");
             System.out.println("1. Movie Title");
             System.out.println("2. Genre");
@@ -185,8 +176,7 @@ public class MainMenu
             int choice = InputValidator.getValidatedInt(scanner, "Enter your choice: ");
             System.out.println();
 
-            switch (choice)
-            {
+            switch (choice) {
                 case 1:
                     SearchReview.searchByMovieTitle(scanner);
                     break;
@@ -206,6 +196,4 @@ public class MainMenu
             }
         }
     }
-
-
 }

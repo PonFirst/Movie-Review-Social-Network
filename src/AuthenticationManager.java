@@ -3,66 +3,84 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class AuthenticationManager
-{
-    private static AuthenticationManager instance;
-    private User currentUser;
-    private boolean loggedIn = false;
+/**
+ * AuthenticationManager handles user authentication and registration functionalities.
+ * This class follows the Singleton design pattern to ensure only one instance exists.
+ */
+public class AuthenticationManager {
+    private static AuthenticationManager instance; // Singleton instance
+    private User currentUser; // Currently logged-in user
+    private boolean loggedIn = false; // Flag to track if a user is logged in
 
-    private AuthenticationManager()
-    {
+    /**
+     * Private constructor to prevent multiple instances
+     */
+    private AuthenticationManager() {
     }
 
-    public static AuthenticationManager getInstance()
-    {
-        if (instance == null)
-        {
+    /**
+     * Gets the singleton instance of AuthenticationManager
+     * 
+     * @return the singleton instance
+     */
+    public static AuthenticationManager getInstance() {
+        if (instance == null) {
             instance = new AuthenticationManager();
         }
         return instance;
     }
 
-    public boolean isUserLoggedIn()
-    {
+    /**
+     * Checks if a user is currently logged in
+     * 
+     * @return true if a user is logged in, false otherwise
+     */
+    public boolean isUserLoggedIn() {
         return loggedIn;
     }
 
-    public User getCurrentUser()
-    {
+    /**
+     * Gets the currently logged-in user
+     * 
+     * @return the current user object or null if no user is logged in
+     */
+    public User getCurrentUser() {
         return currentUser;
     }
 
-    public boolean login(String email, String password)
-    {
-        // Changed to use Database.executeQuery instead of direct connection
+    /**
+     * Attempts to log in a user with the provided credentials
+     * 
+     * @param email the user's email
+     * @param password the user's password
+     * @return true if login is successful, false otherwise
+     */
+    public boolean login(String email, String password) {
+        // Created SQL query to validate user credentials
         String query = "SELECT * FROM users WHERE email = '" + email + "' AND password = '" + password + "'";
 
-        try 
-        {
+        try {
             ResultSet resultSet = Database.getInstance().executeQuery(query);
 
-            if (resultSet.next())
-            {
+            if (resultSet.next()) {
                 ArrayList<Genre.GenreType> favoriteGenres = new ArrayList<>();
                 int userID = resultSet.getInt("userID");
 
-                // Fetch genres from UserGenres
+                // Fetch user's favorite genres from UserGenres table
                 String genreQuery = "SELECT genre FROM UserGenres WHERE userID = " + userID;
                 ResultSet genreResults = Database.getInstance().executeQuery(genreQuery);
 
-                while (genreResults.next())
-                {
+                while (genreResults.next()) {
                     String genreName = genreResults.getString("genre");
-                    try
-                    {
+                    try {
                         favoriteGenres.add(Genre.GenreType.valueOf(genreName.trim()));
                     }
-                    catch (IllegalArgumentException e)
-                    {
+                    catch (IllegalArgumentException e) {
                         System.err.println("Invalid genre in UserGenres: " + genreName);
                     }
                 }
 
+                // Create user object and set login status
                 currentUser = new User(userID, resultSet.getString("username"), email, password, favoriteGenres);
 
                 loggedIn = true;
@@ -72,16 +90,17 @@ public class AuthenticationManager
 
             return false;
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             System.err.println("Database error: " + e.getMessage());
             return false;
         }
     }
 
-    // Other methods remain unchanged
-    public void register()
-    {
+    /**
+     * Handles the user registration process by collecting user information
+     * and saving it to the database
+     */
+    public void register() {
         Scanner scanner = new Scanner(System.in);
 
         String username = promptUsername(scanner);
@@ -96,6 +115,7 @@ public class AuthenticationManager
             return;
         }
 
+        // Create and save the new user
         int userID = User.getNextUserID();
         User newUser = new User(userID, username, email, password, favoriteGenres);
         newUser.save();
@@ -105,48 +125,67 @@ public class AuthenticationManager
         loggedIn = true;
     }
 
-    public void logout()
-    {
+    /**
+     * Logs out the current user
+     */
+    public void logout() {
         currentUser = null;
         loggedIn = false;
         System.out.println("Logged out successfully.\n");
     }
 
-    private String promptUsername(Scanner scanner)
-    {
-        while (true)
-        {
+    /**
+     * Prompts the user for a username and ensures it's not already taken
+     * 
+     * @param scanner Scanner object for input
+     * @return a unique username
+     */
+    private String promptUsername(Scanner scanner) {
+        while (true) {
             System.out.print("Enter username: ");
             String username = scanner.nextLine();
-            if (!User.isUsernameTaken(username))
-            {
+            if (!User.isUsernameTaken(username)) {
                 return username;
             }
             System.out.println("Username already taken!");
         }
     }
 
-    private String promptEmail(Scanner scanner)
-    {
+    /**
+     * Prompts the user for a valid email address
+     * 
+     * @param scanner Scanner object for input
+     * @return a valid email address
+     */
+    private String promptEmail(Scanner scanner) {
         while (true) {
             System.out.print("Enter email: ");
             String email = scanner.nextLine();
-            if (InputValidator.isValidEmail(email))
-            {
+            if (InputValidator.isValidEmail(email)) {
                 return email;
             }
             System.out.println("Invalid email format.");
         }
     }
 
-    private String promptPassword(Scanner scanner)
-    {
+    /**
+     * Prompts the user for a password
+     * 
+     * @param scanner Scanner object for input
+     * @return the password entered by the user
+     */
+    private String promptPassword(Scanner scanner) {
         System.out.print("Enter password: ");
         return scanner.nextLine();
     }
 
-    private ArrayList<Genre.GenreType> promptGenres(Scanner scanner)
-    {
+    /**
+     * Prompts the user to select their favorite genres
+     * 
+     * @param scanner Scanner object for input
+     * @return a list of the user's favorite genres
+     */
+    private ArrayList<Genre.GenreType> promptGenres(Scanner scanner) {
         Genre.GenreType[] genres = Genre.GenreType.values();
 
         while (true) {

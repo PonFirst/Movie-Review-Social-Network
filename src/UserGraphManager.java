@@ -6,15 +6,25 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
-public class UserGraphManager{
-    // Static instance of the class
+/**
+ * UserGraphManager handles all social network operations between users including following,
+ * unfollowing, and suggesting new users to follow. It uses the Graph class to maintain
+ * relationship data and implements the Singleton pattern.
+ */
+public class UserGraphManager {
+    // Static instance of the class for Singleton pattern
     private static UserGraphManager instance;
 
     // Private constructor to prevent instantiation
     private UserGraphManager() {
     }
 
-    // Public method to provide access to the single instance
+    /**
+     * Public method to provide access to the single instance
+     * Thread-safe implementation of Singleton pattern with double-checked locking
+     * 
+     * @return the singleton instance of UserGraphManager
+     */
     public static UserGraphManager getInstance() {
         if (instance == null) {
             synchronized (UserGraphManager.class) {
@@ -26,36 +36,43 @@ public class UserGraphManager{
         return instance;
     }
 
-    public void followUser(Scanner scanner)
-    {
+    /**
+     * Allows the current user to follow another user.
+     * Handles the user search, profile display, and confirmation process.
+     * 
+     * @param scanner Scanner object for user input
+     */
+    public void followUser(Scanner scanner) {
         System.out.print("Enter the username of the user you want to follow: ");
         String username = scanner.nextLine();
     
         User userToFollow = Graph.getInstance().getUserByUsername(username);
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
 
-
+        // Check if the user exists
         if (userToFollow == null) {
             System.out.println("User not found.");
             return;
         }
     
+        // Cannot follow yourself
         if (currentUser.equals(userToFollow)) {
             System.out.println("You cannot follow yourself.");
             return;
         }
     
-        // Use Graph's method to check if already following
+        // Check if already following
         if (Graph.getInstance().isFollowing(currentUser, userToFollow)) {
             System.out.println("You are already following " + userToFollow.getUserName() + ".");
             return;
         }
     
+        // Display profile and ask for confirmation
         userToFollow.displayProfile();
         System.out.print("\nDo you want to follow this user? (y/n): ");
         String choice = scanner.nextLine().trim().toLowerCase();
         if (choice.equals("y")) {
-            // Use Graph's method to add follower
+            // Add follower relationship
             Graph.getInstance().addFollower(currentUser, userToFollow);
             System.out.println("You are now following " + userToFollow.getUserName() + ".");
         } else {
@@ -63,9 +80,13 @@ public class UserGraphManager{
         }
     }
     
-
-    public void unfollowUser(Scanner scanner)
-    {
+    /**
+     * Allows the current user to unfollow another user.
+     * Handles the user search, profile display, and confirmation process.
+     * 
+     * @param scanner Scanner object for user input
+     */
+    public void unfollowUser(Scanner scanner) {
         System.out.print("Enter the username of the user you want to unfollow: ");
         String username = scanner.nextLine();
         System.out.println();
@@ -73,28 +94,31 @@ public class UserGraphManager{
         User userToUnfollow = Graph.getInstance().getUserByUsername(username);
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
     
+        // Check if the user exists
         if (userToUnfollow == null) {
             System.out.println("User not found.");
             return;
         }
     
+        // Cannot unfollow yourself
         if (currentUser.equals(userToUnfollow)) {
             System.out.println("You cannot unfollow yourself.");
             return;
         }
     
-        // Check if the user is currently following the target
+        // Check if not following
         if (!Graph.getInstance().isFollowing(currentUser, userToUnfollow)) {
             System.out.println("You are not following " + userToUnfollow.getUserName() + ".");
             return;
         }
     
+        // Display profile and ask for confirmation
         userToUnfollow.displayProfile();
         System.out.print("\nDo you want to unfollow this user? (y/n): ");
         String choice = scanner.nextLine().trim().toLowerCase();
         
         if (choice.equals("y")) {
-            // Use Graph's method to remove follower
+            // Remove follower relationship
             boolean unfollowSuccessful = Graph.getInstance().removeFollower(currentUser, userToUnfollow);
             
             if (unfollowSuccessful) {
@@ -107,21 +131,21 @@ public class UserGraphManager{
         }
     }
 
-
-    // Display a list of the latest reviews made by the people the user follows
-    public void displayLatestReviews()
-    {
+    /**
+     * Displays a list of the latest reviews made by the people the user follows
+     * Shows what the user's network has been reviewing recently
+     */
+    public void displayLatestReviews() {
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
-        Graph.getInstance().printFollowingLatestReviews(currentUser);
-    
+        UserGraphManager.getInstance().printFollowingLatestReviews(currentUser);
     }
-
-
 
     /**
      * Recommends users to follow based on multiple criteria in priority order:
      * 1. Users who have written reviews of movies in categories similar to ones you've liked
      * 2. Users who are followed by users you follow (friends of friends)
+     * 
+     * Generates and displays personalized user recommendations
      */
     public void followRecomendations() {
         User currentUser = AuthenticationManager.getInstance().getCurrentUser();
@@ -141,7 +165,7 @@ public class UserGraphManager{
         
         // 2. Fill any remaining spots with friends of friends
         if (uniqueRecommendations.size() < 5) {
-            List<User> friendsOfFriends = Graph.getInstance().getFriendsOfFriendsNotConnected(currentUser);
+            List<User> friendsOfFriends = UserGraphManager.getInstance().getPotentialConnections(currentUser);
             for (User user : friendsOfFriends) {
                 // Only add if we haven't reached 5 recommendations yet
                 if (uniqueRecommendations.size() < 5) {
@@ -195,51 +219,6 @@ public class UserGraphManager{
             }
         }
     }
-
-
-/*
-    public void followRecomendations() {
-        User currentUser = AuthenticationManager.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            System.out.println("You need to be logged in to see recommendations.");
-            return;
-        }
-    
-        // Get recommended users based on the current user's favorite genres
-        List<User> friendsOfFriends = Graph.getInstance().getFriendsOfFriendsNotConnected(currentUser);
-
-        // Check if friendsOfFriends is empty
-        if (friendsOfFriends.isEmpty()) {
-            System.out.println("No friends of friends available for recommendations.");
-            return;
-        }
-
-        // Print the recommended users
-        System.out.println("Recommended users to follow based on your friends of friends:");
-        for (User user : friendsOfFriends) {
-            System.out.println("Username: " + user.getUserName());
-            System.out.println("Genres: " + user.getFavoriteGenres());
-            System.out.println("Latest review:\n" + user.getLatestReview());
-        }
-    }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * Recommends users who have written reviews for movies in categories similar 
@@ -354,5 +333,75 @@ public class UserGraphManager{
         }
         
         return recommendedUsers;
+    }
+
+    /**
+     * Gets a list of potential users to follow based on "friends of friends" relationship
+     * 
+     * @param user the current user
+     * @return a list of users who are followed by people the user follows
+     */
+    public List<User> getPotentialConnections(User user) {
+        // Get the singleton instance of the Graph
+        Graph graph = Graph.getInstance();
+    
+        // Get all users that the specified user is following
+        List<User> userFollowing = graph.getFollowing(user);
+    
+        if (userFollowing.isEmpty()) {
+            return new ArrayList<>();
+        }
+    
+        // Create a set for faster lookup and to eliminate duplicates
+        Set<User> result = new HashSet<>();
+    
+        // For each user the specified user follows
+        for (User friend : userFollowing) {
+            // Get the users that this friend follows
+            List<User> friendFollowing = graph.getFollowing(friend);
+    
+            // Add all the friend's following to our result set
+            result.addAll(friendFollowing);
+        }
+    
+        // Remove the original user from the result (if present)
+        result.remove(user);
+    
+        // Remove users that the original user is already following
+        result.removeAll(userFollowing);
+    
+        // Convert set back to list and return
+        return new ArrayList<>(result);
+    }
+
+    /**
+     * Displays the latest reviews from users that the specified user is following
+     * 
+     * @param user the user whose followed users' reviews will be shown
+     */
+    public void printFollowingLatestReviews(User user) {
+        // Get the singleton instance of the Graph
+        Graph graph = Graph.getInstance();
+    
+        // Get the list of users the specified user is following
+        List<User> followedUsers = graph.getFollowing(user);
+    
+        if (followedUsers.isEmpty()) {
+            System.out.println(user.getUserName() + " is not following anyone.");
+            return;
+        }
+    
+        // Print the latest reviews from each followed user
+        for (User followedUser : followedUsers) {
+            Review latestReview = followedUser.getLatestReview();
+    
+            if (latestReview == null) {
+                System.out.println(followedUser.getUserName() + " has no reviews.");
+                continue;
+            }
+    
+            System.out.println("Latest review from " + followedUser.getUserName() + ":");
+            System.out.print(latestReview);
+        }
     }
 }

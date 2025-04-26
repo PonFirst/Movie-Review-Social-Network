@@ -9,21 +9,17 @@ import java.util.Scanner;
  * It provides methods to search reviews by movie title, genre, username, and date range.
  * The class utilizes the Singleton pattern and interacts with the database to get reviews.
  */
-public class SearchReview
-{
+public class SearchReview {
     // Singleton instance of SearchReview
     private static SearchReview instance;
 
     // Private constructor to prevent instantiation
-    private SearchReview()
-    {
+    private SearchReview() {
     }
 
     // Returns the singleton instance of SearchReview
-    public static SearchReview getInstance()
-    {
-        if (instance == null)
-        {
+    public static SearchReview getInstance() {
+        if (instance == null) {
             instance = new SearchReview();
         }
         return instance;
@@ -34,17 +30,14 @@ public class SearchReview
      * @param titleKeyword The keyword to match against movie titles
      * @return A list of movies whose titles contain the given keyword
      */
-    public static ArrayList<Movie> match(String titleKeyword)
-    {
+    public static ArrayList<Movie> match(String titleKeyword) {
         ArrayList<Movie> matchedMovies = new ArrayList<>();
-        // Changed to use Database.executeQuery
+        // SQL query to find movies with matching titles
         String sql = "SELECT * FROM movies WHERE title LIKE '%" + titleKeyword + "%'";
 
-        try
-        {
+        try {
             ResultSet rs = Database.getInstance().executeQuery(sql);
-            while (rs.next())
-            {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String title = rs.getString("title");
                 String genreStr = rs.getString("genres").trim().toUpperCase().replace(' ', '_');
@@ -54,8 +47,7 @@ public class SearchReview
                 matchedMovies.add(movie);
             }
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             System.err.println("Error finding matching movies: " + e.getMessage());
         }
 
@@ -67,8 +59,7 @@ public class SearchReview
      * @param movieTitle The title of the movie
      * @return A list of reviews for the movie
      */
-    public static ArrayList<Review> findReviewsByMovie(String movieTitle)
-    {
+    public static ArrayList<Review> findReviewsByMovie(String movieTitle) {
         ArrayList<Review> reviews = new ArrayList<>();
         
         // First, find matching movies
@@ -79,19 +70,16 @@ public class SearchReview
             return reviews;
         }
 
-        try
-        {
-            for (Movie movie : matchedMovies)
-            {
+        try {
+            for (Movie movie : matchedMovies) {
                 int movieId = movie.getMovieID();
+                // SQL query to find reviews for this movie
                 String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
                 "FROM reviews r WHERE r.movieID = " + movieId + 
                 " ORDER BY r.reviewDate DESC LIMIT 2";
    
-
                 ResultSet rs = Database.getInstance().executeQuery(sql);
-                while (rs.next())
-                {
+                while (rs.next()) {
                     int reviewID = rs.getInt("reviewID");
                     String content = rs.getString("content");
                     int rating = rs.getInt("rating");
@@ -105,29 +93,25 @@ public class SearchReview
                 }
             }
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             System.err.println("Error finding reviews by movie: " + e.getMessage());
         }
 
         return reviews;
     }
 
-
     /**
      * Finds all reviews based on username.
      * @param username The username of the reviewer
      * @return A list of reviews written by the user
      */
-    public static ArrayList<Review> findReviewsByUsername(String username)
-    {
+    public static ArrayList<Review> findReviewsByUsername(String username) {
         ArrayList<Review> reviews = new ArrayList<>();
-        // Changed to use Database.executeQuery
+        // SQL query to find reviews by username
         String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
                 "FROM reviews r JOIN users u ON r.userID = u.userID WHERE u.username = '" + username + "'";
 
-        try
-        {
+        try {
             ResultSet rs = Database.getInstance().executeQuery(sql);
             while (rs.next()) {
                 int reviewID = rs.getInt("reviewID");
@@ -142,8 +126,7 @@ public class SearchReview
                 reviews.add(review);
             }
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             System.err.println("Error finding reviews by username: " + e.getMessage());
         }
 
@@ -155,31 +138,26 @@ public class SearchReview
      * @param genreInput The genre to search for
      * @return A list of reviews for movies in the given genre
      */
-    public static ArrayList<Review> findReviewsByGenre(String genreInput)
-    {
+    public static ArrayList<Review> findReviewsByGenre(String genreInput) {
         ArrayList<Review> reviews = new ArrayList<>();
 
         // Validate genre
         Genre.GenreType genreType;
-        try
-        {
+        try {
             genreType = Genre.GenreType.valueOf(genreInput.trim().toUpperCase().replace(' ', '_'));
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             System.out.println("Invalid movie genre: " + genreInput);
             return null;
         }
 
-        // Changed to use Database.executeQuery
+        // SQL query to find reviews for movies of this genre
         String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
                 "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE m.genres LIKE '%" + genreType.toString() + "%'";
 
-        try
-        {
+        try {
             ResultSet rs = Database.getInstance().executeQuery(sql);
-            while (rs.next())
-            {
+            while (rs.next()) {
                 int reviewID = rs.getInt("reviewID");
                 String content = rs.getString("content");
                 int rating = rs.getInt("rating");
@@ -192,8 +170,7 @@ public class SearchReview
                 reviews.add(review);
             }
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             System.err.println("Error finding reviews by genre: " + e.getMessage());
         }
 
@@ -206,21 +183,18 @@ public class SearchReview
      * @param endDate The end of the date range
      * @return A list of reviews within the date range
      */
-    public static ArrayList<Review> findReviewsByDateRange(Date startDate, Date endDate)
-    {
+    public static ArrayList<Review> findReviewsByDateRange(Date startDate, Date endDate) {
         ArrayList<Review> reviews = new ArrayList<>();
 
-        // Convert to milliseconds
+        // Convert to milliseconds for database comparison
         long startMillis = startDate.getTime();
         long endMillis = endDate.getTime() + (24L * 60 * 60 * 1000) - 1; // End of the day
 
         String sql = "SELECT * FROM reviews WHERE reviewDate BETWEEN " + startMillis + " AND " + endMillis;
 
-        try
-        {
+        try {
             ResultSet rs = Database.getInstance().executeQuery(sql);
-            while (rs.next())
-            {
+            while (rs.next()) {
                 int reviewID = rs.getInt("reviewID");
                 String content = rs.getString("content");
                 int rating = rs.getInt("rating");
@@ -235,45 +209,37 @@ public class SearchReview
             }
             rs.close();
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             System.err.println("Error finding reviews by date range: " + e.getMessage());
         }
 
         return reviews;
     }
 
-
     /**
      * Asks the user to search for reviews by movie title and displays the results.
      * @param scanner The scanner to read user input
      */
-    public static void searchByMovieTitle(Scanner scanner)
-    {
-        while (true)
-        {
+    public static void searchByMovieTitle(Scanner scanner) {
+        while (true) {
             System.out.print("Enter Movie Title: ");
             String movieTitle = scanner.nextLine();
             System.out.println();
 
             ArrayList<Review> reviews = SearchReview.findReviewsByMovie(movieTitle);
 
-            if (reviews.isEmpty())
-            {
+            if (reviews.isEmpty()) {
                 System.out.println("No reviews found for movies matching: " + movieTitle);
             }
-            else
-            {
+            else {
                 System.out.println("Reviews for: " + movieTitle);
-                for (Review review : reviews)
-                {
+                for (Review review : reviews) {
                     System.out.println(review);
                 }
 
                 boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
 
-                if (likeChoice)
-                {
+                if (likeChoice) {
                     ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
@@ -288,38 +254,31 @@ public class SearchReview
      * Asks the user to search for reviews by genre and displays the results.
      * @param scanner The scanner to read user input
      */
-    public static void searchByGenre(Scanner scanner)
-    {
-        while (true)
-        {
+    public static void searchByGenre(Scanner scanner) {
+        while (true) {
             System.out.print("Enter Genre: ");
             String genre = scanner.nextLine();
             ArrayList<Review> reviews = SearchReview.findReviewsByGenre(genre);
 
-            if (reviews == null)
-            {
+            if (reviews == null) {
                 System.out.print("Do you want to try another genre? (y/n): ");
                 String again = scanner.nextLine();
                 if (!again.equalsIgnoreCase("y")) break;
                 continue;
             }
 
-            if (reviews.isEmpty())
-            {
+            if (reviews.isEmpty()) {
                 System.out.println("No reviews found for genre: " + genre);
             }
-            else
-            {
+            else {
                 System.out.println("Reviews in Genre: " + genre);
-                for (Review review : reviews)
-                {
+                for (Review review : reviews) {
                     System.out.println(review);
                 }
 
                 boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
 
-                if (likeChoice)
-                {
+                if (likeChoice) {
                     ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
@@ -334,43 +293,36 @@ public class SearchReview
      * Asks the user to search for reviews within a specific date range and displays the results.
      * @param scanner The scanner to read user input
      */
-    public static void searchByDateRange(Scanner scanner)
-    {
+    public static void searchByDateRange(Scanner scanner) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dateFormat.setLenient(false);
 
-        while (true)
-        {
+        while (true) {
             Date startDate = InputValidator.readValidDate("Enter Start Review Date (YYYY-MM-DD): ", scanner, dateFormat);
             Date endDate = InputValidator.readValidDate("Enter End Review Date (YYYY-MM-DD): ", scanner, dateFormat);
 
-            if (startDate.after(endDate))
-            {
+            if (startDate.after(endDate)) {
                 System.out.println("Start date must be before or equal to end date. Try again.");
                 continue;
             }
 
-            ArrayList<Review> reviews = SearchReview.findReviewsByDateRange(startDate, endDate); // change to pass long
+            ArrayList<Review> reviews = SearchReview.findReviewsByDateRange(startDate, endDate);
 
             String startStr = dateFormat.format(startDate);
             String endStr = dateFormat.format(endDate);
 
-            if (reviews.isEmpty())
-            {
+            if (reviews.isEmpty()) {
                 System.out.println("No reviews found between " + startStr + " and " + endStr + ".");
             }
-            else
-            {
+            else {
                 System.out.println("Reviews from " + startStr + " to " + endStr + ":");
-                for (Review review : reviews)
-                {
+                for (Review review : reviews) {
                     System.out.println(review);
                 }
 
                 boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
 
-                if (likeChoice)
-                {
+                if (likeChoice) {
                     ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
@@ -383,35 +335,28 @@ public class SearchReview
         System.out.println("Returning to main menu...");
     }
 
-
     /**
      * Asks the user to search for reviews by username of the reviewer and displays the results.
      * @param scanner The scanner to read user input
      */
-    public static void searchByUsername(Scanner scanner)
-    {
-        while (true)
-        {
+    public static void searchByUsername(Scanner scanner) {
+        while (true) {
             System.out.print("Enter Username: \n");
             String username = scanner.nextLine();
             ArrayList<Review> reviews = SearchReview.findReviewsByUsername(username);
 
-            if (reviews.isEmpty())
-            {
+            if (reviews.isEmpty()) {
                 System.out.println("No reviews found for user: " + username);
             }
-            else
-            {
+            else {
                 System.out.println("Reviews by user: " + username);
-                for (Review review : reviews)
-                {
+                for (Review review : reviews) {
                     System.out.println(review);
                 }
 
                 boolean likeChoice = InputValidator.confirmYes("Like any review? (y/n): ", scanner);
 
-                if (likeChoice)
-                {
+                if (likeChoice) {
                     ReviewManager.getInstance().likeReviewMenu(scanner);
                 }
             }
