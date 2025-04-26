@@ -75,6 +75,19 @@ public class Database
         return connection;
     }
 
+    public ResultSet executeQuery(String sql) throws SQLException
+    {
+        Statement stmt = connection.createStatement();
+        return stmt.executeQuery(sql);
+    }
+
+    public int executeUpdate(String sql) throws SQLException
+    {
+        Statement stmt = connection.createStatement();
+        return stmt.executeUpdate(sql);
+    }
+
+
     /**
      * Closes the database connection if it's open and nullifies the connection object.
      */

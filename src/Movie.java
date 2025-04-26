@@ -66,9 +66,8 @@ public class Movie
      * Asks the user to enter details for a new movie and saves it to the database.
      * @return the newly created Movie object, or null if creation fails
      */
-    public static Movie createMovie()
+    public static Movie createMovie(Scanner scanner)
     {
-        Scanner scanner = new Scanner(System.in);
         System.out.print("Enter new movie title: ");
         String title = scanner.nextLine();
 

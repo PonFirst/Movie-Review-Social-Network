@@ -53,7 +53,7 @@ public class ReviewManager
             boolean createNew = InputValidator.confirmYes("Would you like to create a new movie? (y/n): ", scanner);
             if (createNew)
             {
-                selectedMovie = Movie.createMovie();
+                selectedMovie = Movie.createMovie(scanner);
                 if (selectedMovie == null)
                 {
                     System.out.println("Failed to create new movie. Review process canceled.");
