@@ -197,10 +197,10 @@ public class Review
     public boolean save()
     {
         // Changed to use Database.executeUpdate
-        java.sql.Date sqlDate = new java.sql.Date(this.reviewDate.getTime());
+        long timestamp = this.reviewDate.getTime();
         String query = "INSERT INTO reviews (movieID, userID, content, rating, reviewDate, likeCount) " +
                 "VALUES (" + this.movieID + ", " + this.userID + ", '" + this.text + "', " + 
-                this.rating + ", '" + sqlDate + "', " + this.likeCount + ")";
+                this.rating + ", '" + timestamp + "', " + this.likeCount + ")";
 
         try
         {

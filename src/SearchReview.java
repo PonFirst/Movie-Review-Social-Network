@@ -209,11 +209,12 @@ public class SearchReview
     public static ArrayList<Review> findReviewsByDateRange(Date startDate, Date endDate)
     {
         ArrayList<Review> reviews = new ArrayList<>();
-        // Changed to use Database.executeQuery
-        Timestamp startTimestamp = new Timestamp(startDate.getTime());
-        Timestamp endTimestamp = new Timestamp(endDate.getTime() + (24 * 60 * 60 * 1000) - 1);
 
-        String sql = "SELECT * FROM reviews WHERE reviewDate BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "'";
+        // Convert to milliseconds
+        long startMillis = startDate.getTime();
+        long endMillis = endDate.getTime() + (24L * 60 * 60 * 1000) - 1; // End of the day
+
+        String sql = "SELECT * FROM reviews WHERE reviewDate BETWEEN " + startMillis + " AND " + endMillis;
 
         try
         {
@@ -225,12 +226,14 @@ public class SearchReview
                 int rating = rs.getInt("rating");
                 int userID = rs.getInt("userID");
                 int movieID = rs.getInt("movieID");
-                Date reviewDate = rs.getTimestamp("reviewDate");
+                long reviewDateMillis = rs.getLong("reviewDate"); // read as long
+                Date reviewDate = new Date(reviewDateMillis);     // convert to Date
                 int likeCount = rs.getInt("likeCount");
 
                 Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
                 reviews.add(review);
             }
+            rs.close();
         }
         catch (SQLException e)
         {
@@ -239,6 +242,7 @@ public class SearchReview
 
         return reviews;
     }
+
 
     /**
      * Asks the user to search for reviews by movie title and displays the results.
@@ -346,7 +350,8 @@ public class SearchReview
                 continue;
             }
 
-            ArrayList<Review> reviews = SearchReview.findReviewsByDateRange(startDate, endDate);
+            ArrayList<Review> reviews = SearchReview.findReviewsByDateRange(startDate, endDate); // change to pass long
+
             String startStr = dateFormat.format(startDate);
             String endStr = dateFormat.format(endDate);
 
@@ -377,6 +382,7 @@ public class SearchReview
 
         System.out.println("Returning to main menu...");
     }
+
 
     /**
      * Asks the user to search for reviews by username of the reviewer and displays the results.
