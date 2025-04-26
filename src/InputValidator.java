@@ -7,7 +7,8 @@ import java.util.Scanner;
  * InputValidator class provides utility methods to validate user input.
  * It handles various input types such as integers, emails, dates, and boolean confirmation.
  */
-public class InputValidator {
+public class InputValidator
+{
     /**
      * Validates and returns an integer input from the user.
      * Continuously asks the user for input until a valid integer is provided.
@@ -16,14 +17,18 @@ public class InputValidator {
      * @param prompt the message to display to the user
      * @return a valid integer input from the user
      */
-    public static int getValidatedInt(Scanner scanner, String prompt) {
-        while (true) {
+    public static int getValidatedInt(Scanner scanner, String prompt)
+    {
+        while (true)
+        {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
-            try {
+            try
+            {
                 return Integer.parseInt(input);
             }
-            catch (NumberFormatException e) {
+            catch (NumberFormatException e)
+            {
                 System.out.println("Invalid input. Please enter an integer.");
             }
         }
@@ -36,7 +41,8 @@ public class InputValidator {
      * @param email the email string to validate
      * @return true if the email matches the regex pattern, false otherwise
      */
-    public static boolean isValidEmail(String email) {
+    public static boolean isValidEmail(String email)
+    {
         return email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
     }
 
@@ -49,19 +55,24 @@ public class InputValidator {
      * @param dateFormat the SimpleDateFormat object that defines the correct date format
      * @return a valid Date object based on the user's input
      */
-    public static Date readValidDate(String prompt, Scanner scanner, SimpleDateFormat dateFormat) {
-        while (true) {
+    public static Date readValidDate(String prompt, Scanner scanner, SimpleDateFormat dateFormat)
+    {
+        while (true)
+        {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
 
-            if (!input.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            if (!input.matches("\\d{4}-\\d{2}-\\d{2}"))
+            {
                 System.out.println("Invalid format. Please enter the date in YYYY-MM-DD format.");
                 continue;
             }
-            try {
+            try
+            {
                 return dateFormat.parse(input);
             }
-            catch (ParseException e) {
+            catch (ParseException e)
+            {
                 System.out.println("Invalid date. Please enter a valid date.");
             }
         }
@@ -75,8 +86,10 @@ public class InputValidator {
      * @param scanner the Scanner object used to read the user's input
      * @return true if the user enters 'y', false if the user enters 'n'
      */
-    public static boolean confirmYes(String prompt, Scanner scanner) {
-        while (true) {
+    public static boolean confirmYes(String prompt, Scanner scanner)
+    {
+        while (true)
+        {
             System.out.print(prompt);
             String input = scanner.nextLine().trim().toLowerCase();
             if (input.equals("y")) return true;

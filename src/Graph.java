@@ -6,7 +6,8 @@ import java.sql.*;
  * Optimized for follower/following relationships between users.
  * Implements the Singleton pattern to ensure only one graph instance exists.
  */
-public class Graph {
+public class Graph
+{
     // Singleton instance
     private static Graph instance = null;
     
@@ -21,18 +22,21 @@ public class Graph {
      * Private constructor for Singleton pattern.
      * Initializes the graph and loads user relationships from the database.
      */
-    private Graph() {
+    private Graph()
+    {
         this.followers = new HashMap<>();
         this.following = new HashMap<>();
         this.userIndex = new HashMap<>();
 
-        try {
+        try
+        {
             // First, load all users from the Users table
             String userQuery = "SELECT userID, username, email FROM Users";
             ResultSet resultSet = Database.getInstance().executeQuery(userQuery);
             
             // Create and load users
-            while (resultSet.next()) {
+            while (resultSet.next())
+            {
                 int userId = resultSet.getInt("userID"); 
                 String username = resultSet.getString("username");
                 String email = resultSet.getString("email");
@@ -56,7 +60,8 @@ public class Graph {
             resultSet = Database.getInstance().executeQuery(followerQuery);
             
             // Add each follower relationship
-            while (resultSet.next()) {
+            while (resultSet.next())
+            {
                 int userId = resultSet.getInt("userID");
                 int followerId = resultSet.getInt("followerID");
                 
@@ -64,13 +69,15 @@ public class Graph {
                 User user = getUserByKey(userId);
                 User follower = getUserByKey(followerId);
                 
-                if (user != null && follower != null) {
+                if (user != null && follower != null)
+                {
                     // Add the follower relationship (follower follows user)
                     addFollower(follower, user);
                 }
             }
             
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             System.err.println("Error loading social graph from database: " + e.getMessage());
             e.printStackTrace();
         }
@@ -85,22 +92,28 @@ public class Graph {
      * @param email Email from the database
      * @return A new User object
      */
-    private User createUserObject(int userId, String username, String email) {
+    private User createUserObject(int userId, String username, String email)
+    {
         // Load genres for this user
         ArrayList<Genre.GenreType> genres = new ArrayList<>();
-        try {
+        try
+        {
             // Query to get user's favorite genres
             String genreQuery = "SELECT genre FROM UserGenres WHERE userID = " + userId;
             ResultSet genreResultSet = Database.getInstance().executeQuery(genreQuery);
             
-            while (genreResultSet.next()) {
-                try {
+            while (genreResultSet.next())
+            {
+                try
+                {
                     genres.add(Genre.GenreType.valueOf(genreResultSet.getString("genre")));
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException e)
+                {
                     System.err.println("Invalid genre in database for user " + userId);
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             System.err.println("Error loading genres for user " + userId + ": " + e.getMessage());
         }
         
@@ -114,8 +127,10 @@ public class Graph {
      * 
      * @return the singleton instance
      */
-    public static Graph getInstance() {
-        if (instance == null) {
+    public static Graph getInstance()
+    {
+        if (instance == null)
+        {
             instance = new Graph();
         }
         return instance;
@@ -126,7 +141,8 @@ public class Graph {
      * 
      * @param user the user to add
      */
-    private void addUser(User user) {
+    private void addUser(User user)
+    {
         followers.putIfAbsent(user, new ArrayList<>());
         following.putIfAbsent(user, new ArrayList<>());
     }
@@ -138,13 +154,15 @@ public class Graph {
      * @param target the user being followed
      * @return true if the relationship was added, false if it already existed
      */
-    public boolean addFollower(User follower, User target) {
+    public boolean addFollower(User follower, User target)
+    {
         // Add users if they don't exist
         addUser(follower);
         addUser(target);
         
         // Check if the relationship already exists
-        if (!followers.get(target).contains(follower)) {
+        if (!followers.get(target).contains(follower))
+        {
             // Add the follower relationship
             followers.get(target).add(follower);  // target's followers include follower
             following.get(follower).add(target);  // follower is following target
@@ -160,19 +178,24 @@ public class Graph {
      * @param target the user being followed
      * @return true if the relationship was successfully removed, false if it did not exist
      */
-    public boolean removeFollower(User follower, User target) {
+    public boolean removeFollower(User follower, User target)
+    {
         boolean removed = false;
         
         // Remove from target's followers list
-        if (followers.containsKey(target)) {
-            if (followers.get(target).remove(follower)) {
+        if (followers.containsKey(target))
+        {
+            if (followers.get(target).remove(follower))
+            {
                 removed = true;
             } 
         }
         
         // Remove from follower's following list
-        if (following.containsKey(follower)) {
-            if (following.get(follower).remove(target)) {
+        if (following.containsKey(follower))
+        {
+            if (following.get(follower).remove(target))
+            {
                 removed = true;
             }
         }
@@ -187,8 +210,10 @@ public class Graph {
      * @param key the key to index by (e.g., user ID)
      * @param user the user to index
      */
-    private void indexUser(Object key, User user) {
-        if (followers.containsKey(user)) {
+    private void indexUser(Object key, User user)
+    {
+        if (followers.containsKey(user))
+        {
             userIndex.put(key, user);
         }
     }
@@ -199,7 +224,8 @@ public class Graph {
      * @param key the key to look up (e.g., user ID)
      * @return the user if found, null otherwise
      */
-    public User getUserByKey(Object key) {
+    public User getUserByKey(Object key)
+    {
         return userIndex.get(key);
     }
     
@@ -209,7 +235,8 @@ public class Graph {
      * @param username the username to look up
      * @return the user if found, null otherwise
      */
-    public User getUserByUsername(String username) {
+    public User getUserByUsername(String username)
+    {
         return userIndex.get(username);
     }
     
@@ -219,7 +246,8 @@ public class Graph {
      * @param user the user
      * @return a list of all followers
      */
-    public List<User> getFollowers(User user) {
+    public List<User> getFollowers(User user)
+    {
         return followers.getOrDefault(user, new ArrayList<>());
     }
 
@@ -229,7 +257,8 @@ public class Graph {
      * @param user the user
      * @return a list of all users being followed
      */
-    public List<User> getFollowing(User user) {
+    public List<User> getFollowing(User user)
+    {
         return following.getOrDefault(user, new ArrayList<>());
     }
     
@@ -240,10 +269,13 @@ public class Graph {
      * @param target the user being followed
      * @return true if follower is following target, false otherwise
      */
-    public boolean isFollowing(User follower, User target) {
-        for (Map.Entry<User, List<User>> entry : following.entrySet()) {
+    public boolean isFollowing(User follower, User target)
+    {
+        for (Map.Entry<User, List<User>> entry : following.entrySet())
+        {
             // Use equals() to find the correct follower
-            if (entry.getKey().equals(follower)) {
+            if (entry.getKey().equals(follower))
+            {
                 // Use contains() which will use the equals() method internally
                 return entry.getValue().contains(target);
             }
@@ -257,7 +289,8 @@ public class Graph {
      * @param user the user
      * @return the number of followers
      */
-    public int getFollowerCount(User user) {
+    public int getFollowerCount(User user)
+    {
         return followers.getOrDefault(user, Collections.emptyList()).size();
     }
 
@@ -267,7 +300,8 @@ public class Graph {
      * @param user the user
      * @return the number of users being followed
      */
-    public int getFollowingCount(User user) {
+    public int getFollowingCount(User user)
+    {
         return following.getOrDefault(user, Collections.emptyList()).size();
     }
     
@@ -279,7 +313,8 @@ public class Graph {
      * @return a formatted string showing all users with their followers and following
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuilder sb = new StringBuilder();
         sb.append("Social Network Graph:\n");
         
@@ -288,16 +323,20 @@ public class Graph {
         allUsers.addAll(followers.keySet());
         allUsers.addAll(following.keySet());
         
-        for (User user : allUsers) {
+        for (User user : allUsers)
+        {
             sb.append("User '").append(user.getUserName()).append("' (ID: ")
               .append(user.getUserID()).append("):\n");
             
             // Get followers
             List<User> followersList = followers.get(user);
             sb.append("  Followers: [");
-            if (followersList != null) {
-                for (int i = 0; i < followersList.size(); i++) {
-                    if (i > 0) {
+            if (followersList != null)
+            {
+                for (int i = 0; i < followersList.size(); i++)
+                {
+                    if (i > 0)
+                    {
                         sb.append(", ");
                     }
                     sb.append(followersList.get(i).getUserName());
@@ -308,9 +347,12 @@ public class Graph {
             // Get following
             List<User> followingList = following.get(user);
             sb.append("  Following: [");
-            if (followingList != null) {
-                for (int i = 0; i < followingList.size(); i++) {
-                    if (i > 0) {
+            if (followingList != null)
+            {
+                for (int i = 0; i < followingList.size(); i++)
+                {
+                    if (i > 0)
+                    {
                         sb.append(", ");
                     }
                     sb.append(followingList.get(i).getUserName());
@@ -327,19 +369,23 @@ public class Graph {
      * This method exports the current state of the graph into the database.
      * It clears the existing relationships in the database and re-adds them based on the current graph state.
      */
-    public void disconnect() {
-        try {
+    public void disconnect()
+    {
+        try
+        {
             // Delete existing relationships
             String deleteQuery = "DELETE FROM UserFollower";
             Database.getInstance().executeUpdate(deleteQuery);
             
             // Iterate through all users in the graph
-            for (Map.Entry<User, List<User>> entry : this.following.entrySet()) {
+            for (Map.Entry<User, List<User>> entry : this.following.entrySet())
+            {
                 User currentUser = entry.getKey();
                 List<User> followedUsers = entry.getValue();
                 
                 // For each user this user is following
-                for (User followedUser : followedUsers) {
+                for (User followedUser : followedUsers)
+                {
                     // Insert the relationship
                     String insertQuery = "INSERT INTO UserFollower (userID, followerID) VALUES (" +
                                          followedUser.getUserID() + ", " + currentUser.getUserID() + ")";
@@ -349,7 +395,8 @@ public class Graph {
             
             System.out.println("Successfully synced graph relationships to database.");
             
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             System.err.println("Error syncing graph to database: " + e.getMessage());
             e.printStackTrace();
         }

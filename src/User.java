@@ -7,7 +7,8 @@ import java.util.Objects;
  * password, and favorite genres. It provides methods to manage user data and interact with
  * the database.
  */
-public class User {
+public class User
+{
     private int userID;         // Unique identifier for the user
     private String username;    // The username of the user
     private String email;       // The email of the user
@@ -24,7 +25,8 @@ public class User {
      * @param password the password of the user
      * @param genres   the list of favorite genres, or null to initialize an empty list
      */
-    public User(int userID, String username, String email, String password, ArrayList<Genre.GenreType> genres) {
+    public User(int userID, String username, String email, String password, ArrayList<Genre.GenreType> genres)
+    {
         this.userID = userID;
         this.username = username;
         this.email = email;
@@ -36,7 +38,8 @@ public class User {
      * Get the user's ID
      * @return the user ID
      */
-    public int getUserID() {
+    public int getUserID()
+    {
         return userID;
     }
 
@@ -44,7 +47,8 @@ public class User {
      * Get the user's username
      * @return the username
      */
-    public String getUserName() {
+    public String getUserName()
+    {
         return username;
     }
 
@@ -52,7 +56,8 @@ public class User {
      * Get the list of the user's favorite genres
      * @return the list of favorite genres
      */
-    public ArrayList<Genre.GenreType> getFavoriteGenres() {
+    public ArrayList<Genre.GenreType> getFavoriteGenres()
+    {
         return genres;
     }
 
@@ -61,14 +66,17 @@ public class User {
      * @param username the username to check
      * @return true if the username is taken, false otherwise
      */
-    public static boolean isUsernameTaken(String username) {
-        try {
+    public static boolean isUsernameTaken(String username)
+    {
+        try
+        {
             // Query to check if username exists
             String query = "SELECT 1 FROM users WHERE username = '" + username + "'";
             ResultSet resultSet = Database.getInstance().executeQuery(query);
             return resultSet.next(); // returns true if username exists
         }
-        catch (SQLException e) {
+        catch (SQLException e)
+        {
             System.err.println("Failed to check username: " + e.getMessage());
             return true;
         }
@@ -82,7 +90,8 @@ public class User {
      * @return true if the objects are equal, false otherwise
      */
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
@@ -96,7 +105,8 @@ public class User {
      * @return hash code for this user
      */
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return Objects.hash(getUserID());
     }
 
@@ -104,23 +114,27 @@ public class User {
      * Saves the user's data and favorite genres to the database.
      * Inserts the user record and genres into their tables
      */
-    public void save() {
+    public void save()
+    {
         // Insert user into the database
         String query = "INSERT INTO users (userID, username, email, password) VALUES (" + 
                        this.userID + ", '" + this.username + "', '" + this.email + "', '" + this.password + "')";
 
-        try {
+        try
+        {
             Database.getInstance().executeUpdate(query);
 
             // Save each genre
-            for (Genre.GenreType genre : this.genres) {
+            for (Genre.GenreType genre : this.genres)
+            {
                 String genreQuery = "INSERT INTO UserGenres (userID, genre) VALUES (" + 
                                     this.userID + ", '" + genre.name() + "')";
                 Database.getInstance().executeUpdate(genreQuery);
             }
             System.out.println("User and genres saved to database.");
         }
-        catch (SQLException e) {
+        catch (SQLException e)
+        {
             System.err.println("User save failed: " + e.getMessage());
         }
     }
@@ -130,16 +144,20 @@ public class User {
      * 
      * @return the next available userID
      */
-    public static int getNextUserID() {
+    public static int getNextUserID()
+    {
         // Query to find the maximum userID
         String query = "SELECT MAX(userID) AS max_id FROM users";
-        try {
+        try
+        {
             ResultSet result = Database.getInstance().executeQuery(query);
-            if (result.next()) {
+            if (result.next())
+            {
                 return result.getInt("max_id") + 1;
             }
         }
-        catch (SQLException e) {
+        catch (SQLException e)
+        {
             System.err.println("Failed to get max user ID: " + e.getMessage());
         }
         return 1;
@@ -150,12 +168,15 @@ public class User {
      * 
      * @return the latest Review object, or null if no reviews exist
      */
-    public Review getLatestReview() {
+    public Review getLatestReview()
+    {
         // Query to get the most recent review by this user
         String query = "SELECT * FROM Reviews WHERE userID = " + this.userID + " ORDER BY reviewDate DESC LIMIT 1";
-        try {
+        try
+        {
             ResultSet resultSet = Database.getInstance().executeQuery(query);
-            if (resultSet.next()) {
+            if (resultSet.next())
+            {
                 return new Review(
                         resultSet.getInt("reviewID"),
                         resultSet.getString("content"), 
@@ -167,7 +188,8 @@ public class User {
                 );
             }
         }
-        catch (SQLException e) {
+        catch (SQLException e)
+        {
             System.err.println("Failed to get latest review: " + e.getMessage());
         }
         return null;
@@ -177,19 +199,23 @@ public class User {
      * Displays the user's profile information including username, favorite genres,
      * and their latest review if available
      */
-    public void displayProfile() {
+    public void displayProfile()
+    {
         // Print user profile information
         System.out.println("Username: " + this.getUserName());
         System.out.print("Favorite Genres: ");
-        for (Genre.GenreType genre : this.getFavoriteGenres()) {
+        for (Genre.GenreType genre : this.getFavoriteGenres())
+        {
             System.out.print(genre + " ");
         }
         System.out.println("\n");
         
         // Display the latest review if available
-        if (getLatestReview() != null) {
+        if (getLatestReview() != null)
+        {
             System.out.println("Latest Review: \n" + getLatestReview());
-        } else {
+        } else
+        {
             System.out.println("No reviews yet.");
         }
     }

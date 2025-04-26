@@ -7,7 +7,8 @@ import java.util.ArrayList;
  * AuthenticationManager handles user authentication and registration functionalities.
  * This class follows the Singleton design pattern to ensure only one instance exists.
  */
-public class AuthenticationManager {
+public class AuthenticationManager
+{
     private static AuthenticationManager instance; // Singleton instance
     private User currentUser; // Currently logged-in user
     private boolean loggedIn = false; // Flag to track if a user is logged in
@@ -15,7 +16,7 @@ public class AuthenticationManager {
     /**
      * Private constructor to prevent multiple instances
      */
-    private AuthenticationManager() {
+    private AuthenticationManager(){
     }
 
     /**
@@ -23,7 +24,8 @@ public class AuthenticationManager {
      * 
      * @return the singleton instance
      */
-    public static AuthenticationManager getInstance() {
+    public static AuthenticationManager getInstance()
+    {
         if (instance == null) {
             instance = new AuthenticationManager();
         }
@@ -35,7 +37,8 @@ public class AuthenticationManager {
      * 
      * @return true if a user is logged in, false otherwise
      */
-    public boolean isUserLoggedIn() {
+    public boolean isUserLoggedIn()
+    {
         return loggedIn;
     }
 
@@ -44,7 +47,8 @@ public class AuthenticationManager {
      * 
      * @return the current user object or null if no user is logged in
      */
-    public User getCurrentUser() {
+    public User getCurrentUser()
+    {
         return currentUser;
     }
 
@@ -55,14 +59,17 @@ public class AuthenticationManager {
      * @param password the user's password
      * @return true if login is successful, false otherwise
      */
-    public boolean login(String email, String password) {
+    public boolean login(String email, String password)
+    {
         // Created SQL query to validate user credentials
         String query = "SELECT * FROM users WHERE email = '" + email + "' AND password = '" + password + "'";
 
-        try {
+        try
+        {
             ResultSet resultSet = Database.getInstance().executeQuery(query);
 
-            if (resultSet.next()) {
+            if (resultSet.next())
+            {
                 ArrayList<Genre.GenreType> favoriteGenres = new ArrayList<>();
                 int userID = resultSet.getInt("userID");
 
@@ -70,12 +77,15 @@ public class AuthenticationManager {
                 String genreQuery = "SELECT genre FROM UserGenres WHERE userID = " + userID;
                 ResultSet genreResults = Database.getInstance().executeQuery(genreQuery);
 
-                while (genreResults.next()) {
+                while (genreResults.next())
+                {
                     String genreName = genreResults.getString("genre");
-                    try {
+                    try
+                    {
                         favoriteGenres.add(Genre.GenreType.valueOf(genreName.trim()));
                     }
-                    catch (IllegalArgumentException e) {
+                    catch (IllegalArgumentException e)
+                    {
                         System.err.println("Invalid genre in UserGenres: " + genreName);
                     }
                 }
@@ -90,7 +100,8 @@ public class AuthenticationManager {
 
             return false;
         }
-        catch (SQLException e) {
+        catch (SQLException e)
+        {
             System.err.println("Database error: " + e.getMessage());
             return false;
         }
@@ -100,7 +111,8 @@ public class AuthenticationManager {
      * Handles the user registration process by collecting user information
      * and saving it to the database
      */
-    public void register() {
+    public void register()
+    {
         Scanner scanner = new Scanner(System.in);
 
         String username = promptUsername(scanner);
@@ -110,7 +122,8 @@ public class AuthenticationManager {
 
         System.out.print("Confirm registration? (y/n): ");
         String confirm = scanner.nextLine().trim().toLowerCase();
-        if (!confirm.equals("y")) {
+        if (!confirm.equals("y"))
+        {
             System.out.println("Registration cancelled.");
             return;
         }
@@ -128,7 +141,8 @@ public class AuthenticationManager {
     /**
      * Logs out the current user
      */
-    public void logout() {
+    public void logout()
+    {
         currentUser = null;
         loggedIn = false;
         System.out.println("Logged out successfully.\n");
@@ -140,11 +154,14 @@ public class AuthenticationManager {
      * @param scanner Scanner object for input
      * @return a unique username
      */
-    private String promptUsername(Scanner scanner) {
-        while (true) {
+    private String promptUsername(Scanner scanner)
+    {
+        while (true)
+        {
             System.out.print("Enter username: ");
             String username = scanner.nextLine();
-            if (!User.isUsernameTaken(username)) {
+            if (!User.isUsernameTaken(username))
+            {
                 return username;
             }
             System.out.println("Username already taken!");
@@ -157,11 +174,14 @@ public class AuthenticationManager {
      * @param scanner Scanner object for input
      * @return a valid email address
      */
-    private String promptEmail(Scanner scanner) {
-        while (true) {
+    private String promptEmail(Scanner scanner)
+    {
+        while (true)
+        {
             System.out.print("Enter email: ");
             String email = scanner.nextLine();
-            if (InputValidator.isValidEmail(email)) {
+            if (InputValidator.isValidEmail(email))
+            {
                 return email;
             }
             System.out.println("Invalid email format.");
@@ -174,7 +194,8 @@ public class AuthenticationManager {
      * @param scanner Scanner object for input
      * @return the password entered by the user
      */
-    private String promptPassword(Scanner scanner) {
+    private String promptPassword(Scanner scanner)
+    {
         System.out.print("Enter password: ");
         return scanner.nextLine();
     }
@@ -185,12 +206,15 @@ public class AuthenticationManager {
      * @param scanner Scanner object for input
      * @return a list of the user's favorite genres
      */
-    private ArrayList<Genre.GenreType> promptGenres(Scanner scanner) {
+    private ArrayList<Genre.GenreType> promptGenres(Scanner scanner)
+    {
         Genre.GenreType[] genres = Genre.GenreType.values();
 
-        while (true) {
+        while (true)
+        {
             System.out.println("Available genres:");
-            for (int i = 0; i < genres.length; i++) {
+            for (int i = 0; i < genres.length; i++)
+            {
                 System.out.print(genres[i]);
                 if (i < genres.length - 1) System.out.print(" | ");
             }
@@ -200,18 +224,22 @@ public class AuthenticationManager {
             ArrayList<Genre.GenreType> favoriteGenres = new ArrayList<>();
             boolean allValid = true;
 
-            for (String genreStr : genresInput.split(",")) {
-                try {
+            for (String genreStr : genresInput.split(","))
+            {
+                try
+                {
                     String formatted = genreStr.trim().toUpperCase().replace(' ', '_');
                     Genre.GenreType genre = Genre.GenreType.valueOf(formatted);
                     favoriteGenres.add(genre);
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException e)
+                {
                     System.out.println("Invalid genre: " + genreStr.trim());
                     allValid = false;
                 }
             }
 
-            if (allValid && !favoriteGenres.isEmpty()) {
+            if (allValid && !favoriteGenres.isEmpty())
+            {
                 return favoriteGenres;
             }
 
