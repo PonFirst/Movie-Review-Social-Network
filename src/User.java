@@ -63,11 +63,12 @@ public class User
      */
     public static boolean isUsernameTaken(String username)
     {
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement("SELECT 1 FROM users WHERE username = ?"))
+        try 
         {
-            statement.setString(1, username);
-            return statement.executeQuery().next(); // returns true if username exists
+            // Changed to use Database.executeQuery
+            String query = "SELECT 1 FROM users WHERE username = '" + username + "'";
+            ResultSet resultSet = Database.getInstance().executeQuery(query);
+            return resultSet.next(); // returns true if username exists
         }
         catch (SQLException e)
         {
@@ -97,27 +98,20 @@ public class User
      */
     public void save()
     {
-        Connection conn = Database.getInstance().getConnection();
-        String query = "INSERT INTO users (userID, username, email, password) VALUES (?, ?, ?, ?)";
+        // Changed to use Database.executeUpdate
+        String query = "INSERT INTO users (userID, username, email, password) VALUES (" + 
+                       this.userID + ", '" + this.username + "', '" + this.email + "', '" + this.password + "')";
 
-        try (PreparedStatement statement = conn.prepareStatement(query))
+        try
         {
-            statement.setInt(1, this.userID);
-            statement.setString(2, this.username);
-            statement.setString(3, this.email);
-            statement.setString(4, this.password);
-            statement.executeUpdate();
+            Database.getInstance().executeUpdate(query);
 
             // Save each genre
             for (Genre.GenreType genre : this.genres)
             {
-                String genreQuery = "INSERT INTO UserGenres (userID, genre) VALUES (?, ?)";
-                try (PreparedStatement genreStatement = conn.prepareStatement(genreQuery))
-                {
-                    genreStatement.setInt(1, this.userID);
-                    genreStatement.setString(2, genre.name());
-                    genreStatement.executeUpdate();
-                }
+                String genreQuery = "INSERT INTO UserGenres (userID, genre) VALUES (" + 
+                                    this.userID + ", '" + genre.name() + "')";
+                Database.getInstance().executeUpdate(genreQuery);
             }
             System.out.println("User and genres saved to database.");
         }
@@ -130,11 +124,11 @@ public class User
 
     public static int getNextUserID()
     {
-        Connection conn = Database.getInstance().getConnection();
+        // Changed to use Database.executeQuery
         String query = "SELECT MAX(userID) AS max_id FROM users";
-        try (PreparedStatement statement = conn.prepareStatement(query))
+        try
         {
-            ResultSet result = statement.executeQuery();
+            ResultSet result = Database.getInstance().executeQuery(query);
             if (result.next())
             {
                 return result.getInt("max_id") + 1;
@@ -150,12 +144,13 @@ public class User
 
     public Review getLatestReview()
     {
-        Connection conn = Database.getInstance().getConnection();
-        String query = "SELECT * FROM Reviews WHERE userID = ? ORDER BY reviewDate DESC LIMIT 1";
-        try (PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setInt(1, this.userID);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
+        // Changed to use Database.executeQuery
+        String query = "SELECT * FROM Reviews WHERE userID = " + this.userID + " ORDER BY reviewDate DESC LIMIT 1";
+        try
+        {
+            ResultSet resultSet = Database.getInstance().executeQuery(query);
+            if (resultSet.next())
+            {
                 return new Review(
                         resultSet.getInt("reviewID"),
                         resultSet.getString("content"), 
@@ -166,7 +161,9 @@ public class User
                         resultSet.getInt("likeCount")
                 );
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             System.err.println("Failed to get latest review: " + e.getMessage());
         }
         return null;
@@ -189,5 +186,4 @@ public class User
             System.out.println("No reviews yet.");
         }
     }
-
 }

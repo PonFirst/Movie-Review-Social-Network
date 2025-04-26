@@ -1,5 +1,4 @@
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -97,19 +96,12 @@ public class Review
      */
     public void deleteReview()
     {
-        Connection conn = Database.getInstance().getConnection();
-        if (conn == null)
-        {
-            System.err.println("Review delete failed: database connection is null");
-            return;
-        }
+        // Changed to use Database.executeUpdate
+        String query = "DELETE FROM reviews WHERE reviewID = " + this.reviewID;
 
-        String query = "DELETE FROM reviews WHERE reviewID = ?";
-
-        try (PreparedStatement statement = conn.prepareStatement(query))
+        try
         {
-            statement.setInt(1, this.reviewID);
-            int rowsDeleted = statement.executeUpdate();
+            int rowsDeleted = Database.getInstance().executeUpdate(query);
             if (rowsDeleted > 0)
             {
                 System.out.println("Review successfully deleted from database.");
@@ -130,22 +122,15 @@ public class Review
      */
     public void likeReview()
     {
-        Connection conn = Database.getInstance().getConnection();
-        if (conn == null)
-        {
-            System.err.println("Database connection failed.");
-            return;
-        }
         // Get the current user from AuthenticationManager
         AuthenticationManager authManager = AuthenticationManager.getInstance();
         int currentUserID = authManager.getCurrentUser().getUserID();
 
-        String checkLikeQuery = "SELECT * FROM Likes WHERE reviewID = ? AND userID = ?";
-        try (PreparedStatement statement = conn.prepareStatement(checkLikeQuery))
+        // Changed to use Database.executeQuery
+        String checkLikeQuery = "SELECT * FROM Likes WHERE reviewID = " + this.reviewID + " AND userID = " + currentUserID;
+        try
         {
-            statement.setInt(1, this.reviewID);
-            statement.setInt(2, currentUserID);
-            ResultSet resultSet = statement.executeQuery();
+            ResultSet resultSet = Database.getInstance().executeQuery(checkLikeQuery);
             if (resultSet.next())
             {
                 System.out.println("You have already liked this review.");
@@ -158,20 +143,15 @@ public class Review
             return;
         }
 
-        String insertLikeQuery = "INSERT INTO Likes (reviewID, userID) VALUES (?, ?)";
-        try (PreparedStatement insertStatement = conn.prepareStatement(insertLikeQuery))
+        // Changed to use Database.executeUpdate
+        String insertLikeQuery = "INSERT INTO Likes (reviewID, userID) VALUES (" + this.reviewID + ", " + currentUserID + ")";
+        try
         {
-            insertStatement.setInt(1, this.reviewID);
-            insertStatement.setInt(2, currentUserID);
-            int rowsAffected = insertStatement.executeUpdate();
+            int rowsAffected = Database.getInstance().executeUpdate(insertLikeQuery);
             if (rowsAffected > 0)
             {
-                String updateLikeCountQuery = "UPDATE Reviews SET likeCount = likeCount + 1 WHERE reviewID = ?";
-                try (PreparedStatement updateStatement = conn.prepareStatement(updateLikeCountQuery))
-                {
-                    updateStatement.setInt(1, this.reviewID);
-                    updateStatement.executeUpdate();
-                }
+                String updateLikeCountQuery = "UPDATE Reviews SET likeCount = likeCount + 1 WHERE reviewID = " + this.reviewID;
+                Database.getInstance().executeUpdate(updateLikeCountQuery);
                 System.out.println("Liked review ID: " + this.reviewID);
             }
             else
@@ -193,13 +173,11 @@ public class Review
      */
     public static boolean userHasReviewedMovie(int userID, int movieID)
     {
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(
-                     "SELECT COUNT(*) FROM Reviews WHERE userID = ? AND movieID = ?"))
+        // Changed to use Database.executeQuery
+        String query = "SELECT COUNT(*) FROM Reviews WHERE userID = " + userID + " AND movieID = " + movieID;
+        try
         {
-            statement.setInt(1, userID);
-            statement.setInt(2, movieID);
-            ResultSet resultSet = statement.executeQuery();
+            ResultSet resultSet = Database.getInstance().executeQuery(query);
             if (resultSet.next())
             {
                 return resultSet.getInt(1) > 0;
@@ -218,26 +196,15 @@ public class Review
      */
     public boolean save()
     {
-        Connection conn = Database.getInstance().getConnection();
-        if (conn == null)
-        {
-            System.err.println("Review save failed: database connection is null");
-            return false;
-        }
-
+        // Changed to use Database.executeUpdate
+        java.sql.Date sqlDate = new java.sql.Date(this.reviewDate.getTime());
         String query = "INSERT INTO reviews (movieID, userID, content, rating, reviewDate, likeCount) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                "VALUES (" + this.movieID + ", " + this.userID + ", '" + this.text + "', " + 
+                this.rating + ", '" + sqlDate + "', " + this.likeCount + ")";
 
-        try (PreparedStatement statement = conn.prepareStatement(query))
+        try
         {
-            statement.setInt(1, this.movieID);
-            statement.setInt(2, this.userID);
-            statement.setString(3, this.text);
-            statement.setInt(4, this.rating);
-            statement.setDate(5, new java.sql.Date(this.reviewDate.getTime()));
-            statement.setInt(6, this.likeCount);
-
-            int rowsAffected = statement.executeUpdate();
+            int rowsAffected = Database.getInstance().executeUpdate(query);
             if (rowsAffected > 0)
             {
                 System.out.println("Review saved to database.");
@@ -256,26 +223,16 @@ public class Review
         }
     }
 
-
     // Updates the review's text and rating in the database
     public void update()
     {
-        Connection conn = Database.getInstance().getConnection();
-        if (conn == null)
+        // Changed to use Database.executeUpdate
+        String query = "UPDATE reviews SET content = '" + this.text + "', rating = " + this.rating + 
+                " WHERE reviewID = " + this.reviewID;
+
+        try
         {
-            System.err.println("Review update failed: database connection is null");
-            return;
-        }
-
-        String query = "UPDATE reviews SET content = ?, rating = ? WHERE reviewID = ?";
-
-        try (PreparedStatement statement = conn.prepareStatement(query))
-        {
-            statement.setString(1, this.text);
-            statement.setInt(2, this.rating);
-            statement.setInt(3, this.reviewID);
-
-            int rowsAffected = statement.executeUpdate();
+            int rowsAffected = Database.getInstance().executeUpdate(query);
             if (rowsAffected > 0)
             {
                 System.out.println("Review updated successfully.");
@@ -298,18 +255,11 @@ public class Review
      */
     public static Review getReviewByID(int reviewID)
     {
-        Connection conn = Database.getInstance().getConnection();
-        if (conn == null)
+        // Changed to use Database.executeQuery
+        String query = "SELECT * FROM reviews WHERE reviewID = " + reviewID;
+        try
         {
-            System.err.println("Failed to fetch review: database connection is null");
-            return null;
-        }
-
-        String query = "SELECT * FROM reviews WHERE reviewID = ?";
-        try (PreparedStatement statement = conn.prepareStatement(query))
-        {
-            statement.setInt(1, reviewID);
-            ResultSet resultSet = statement.executeQuery();
+            ResultSet resultSet = Database.getInstance().executeQuery(query);
             if (resultSet.next())
             {
                 return new Review(
@@ -352,5 +302,4 @@ public class Review
                 "Review: " + text + "\n" +
                 "--------------------\n";
     }
-
 }

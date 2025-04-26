@@ -11,14 +11,11 @@ import java.util.Scanner;
 public class ReviewManager
 {
     private static ReviewManager instance;  // // Singleton instance of ReviewManager
-    private ArrayList<Review> reviews;  // List of reviews
 
     /**
-     * Private constructor to initialize the reviews list.
+     * Private constructor
      */
-    private ReviewManager()
-    {
-        reviews = new ArrayList<>();
+    private ReviewManager() {
     }
 
     /**

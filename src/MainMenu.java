@@ -92,8 +92,8 @@ public class MainMenu
                 authManager.logout();
                 break;
             case 9:
-                Database.getInstance().disconnect();
                 Graph.getInstance().disconnect();
+                Database.getInstance().disconnect();
                 scanner.close();
                 System.exit(0);
                 break;
@@ -142,8 +142,8 @@ public class MainMenu
                     authManager.register();
                     break;
                 case 3:
-                    Database.getInstance().disconnect();
                     Graph.getInstance().disconnect();
+                    Database.getInstance().disconnect();
                     scanner.close();
                     System.exit(0);
                     break;

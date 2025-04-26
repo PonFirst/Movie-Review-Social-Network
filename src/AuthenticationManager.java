@@ -1,14 +1,7 @@
 import java.util.Scanner;
-
-
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Connection;
 import java.sql.ResultSet;
-
+import java.sql.SQLException;
 import java.util.ArrayList;
-
-
 
 public class AuthenticationManager
 {
@@ -41,14 +34,12 @@ public class AuthenticationManager
 
     public boolean login(String email, String password)
     {
-        String query = "SELECT * FROM users WHERE email = ? AND password = ?";
+        // Changed to use Database.executeQuery instead of direct connection
+        String query = "SELECT * FROM users WHERE email = '" + email + "' AND password = '" + password + "'";
 
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement preparedQuery = conn.prepareStatement(query))
+        try 
         {
-            preparedQuery.setString(1, email);
-            preparedQuery.setString(2, password);
-            ResultSet resultSet = preparedQuery.executeQuery();
+            ResultSet resultSet = Database.getInstance().executeQuery(query);
 
             if (resultSet.next())
             {
@@ -56,10 +47,8 @@ public class AuthenticationManager
                 int userID = resultSet.getInt("userID");
 
                 // Fetch genres from UserGenres
-                String genreQuery = "SELECT genre FROM UserGenres WHERE userID = ?";
-                PreparedStatement genreStmt = conn.prepareStatement(genreQuery);
-                genreStmt.setInt(1, userID);
-                ResultSet genreResults = genreStmt.executeQuery();
+                String genreQuery = "SELECT genre FROM UserGenres WHERE userID = " + userID;
+                ResultSet genreResults = Database.getInstance().executeQuery(genreQuery);
 
                 while (genreResults.next())
                 {
@@ -74,8 +63,7 @@ public class AuthenticationManager
                     }
                 }
 
-                currentUser = new User(userID, resultSet.getString("username"), email, password, favoriteGenres
-                );
+                currentUser = new User(userID, resultSet.getString("username"), email, password, favoriteGenres);
 
                 loggedIn = true;
                 System.out.println("Login successful. Welcome, " + currentUser.getUserName() + "!");
@@ -91,6 +79,7 @@ public class AuthenticationManager
         }
     }
 
+    // Other methods remain unchanged
     public void register()
     {
         Scanner scanner = new Scanner(System.in);
@@ -190,5 +179,4 @@ public class AuthenticationManager
             System.out.println("Please enter valid genres.");
         }
     }
-
 }

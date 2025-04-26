@@ -42,17 +42,14 @@ public class Movie
      */
     public double getAverageRating()
     {
-        String sql = "SELECT AVG(rating) AS averageRating FROM reviews WHERE movieID = ?";
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql))
+        // Changed to use Database.executeQuery
+        String sql = "SELECT AVG(rating) AS averageRating FROM reviews WHERE movieID = " + this.movieID;
+        try
         {
-            statement.setInt(1, this.movieID);
-            try (ResultSet resultSet = statement.executeQuery())
+            ResultSet resultSet = Database.getInstance().executeQuery(sql);
+            if (resultSet.next())
             {
-                if (resultSet.next())
-                {
-                    return resultSet.getDouble("averageRating");
-                }
+                return resultSet.getDouble("averageRating");
             }
         }
         catch (SQLException e)
@@ -85,19 +82,21 @@ public class Movie
             return null;
         }
 
-        String sql = "INSERT INTO Movies (title, genres) VALUES (?, ?)";
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+        // Changed to use Database.executeUpdate
+        String sql = "INSERT INTO Movies (title, genres) VALUES ('" + title + "', '" + genre.name() + "')";
+        try
         {
-            statement.setString(1, title);
-            statement.setString(2, genre.name());
-            statement.executeUpdate();
-
-            try (ResultSet resultSet = statement.getGeneratedKeys())
+            int rowsAffected = Database.getInstance().executeUpdate(sql);
+            
+            if (rowsAffected > 0)
             {
+                // Get the ID of the newly inserted movie
+                String idQuery = "SELECT last_insert_rowid() as last_id";
+                ResultSet resultSet = Database.getInstance().executeQuery(idQuery);
+                
                 if (resultSet.next())
                 {
-                    int newMovieID = resultSet.getInt(1);
+                    int newMovieID = resultSet.getInt("last_id");
                     return new Movie(newMovieID, title, genre);
                 }
             }
@@ -128,19 +127,15 @@ public class Movie
     public static String getMovieTitleByID(int movieID)
     {
         String title = "Unknown";
-        String sql = "SELECT title FROM Movies WHERE id = ?";
+        // Changed to use Database.executeQuery
+        String sql = "SELECT title FROM Movies WHERE id = " + movieID;
 
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql))
+        try
         {
-            statement.setInt(1, movieID);
-
-            try (ResultSet resultSet = statement.executeQuery())
+            ResultSet resultSet = Database.getInstance().executeQuery(sql);
+            if (resultSet.next())
             {
-                if (resultSet.next())
-                {
-                    title = resultSet.getString("title");
-                }
+                title = resultSet.getString("title");
             }
         }
         catch (SQLException e)

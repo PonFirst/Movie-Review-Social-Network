@@ -37,28 +37,22 @@ public class SearchReview
     public static ArrayList<Movie> match(String titleKeyword)
     {
         ArrayList<Movie> matchedMovies = new ArrayList<>();
-        String sql = "SELECT * FROM movies WHERE title LIKE ?";
+        // Changed to use Database.executeQuery
+        String sql = "SELECT * FROM movies WHERE title LIKE '%" + titleKeyword + "%'";
 
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql))
+        try
         {
-
-            statement.setString(1, "%" + titleKeyword + "%");
-
-            try (ResultSet rs = statement.executeQuery())
+            ResultSet rs = Database.getInstance().executeQuery(sql);
+            while (rs.next())
             {
-                while (rs.next())
-                {
-                    int id = rs.getInt("id");
-                    String title = rs.getString("title");
-                    String genreStr = rs.getString("genres").trim().toUpperCase().replace(' ', '_');
-                    Genre.GenreType genre = Genre.GenreType.valueOf(genreStr);
-                    Movie movie = new Movie(id, title, genre);
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String genreStr = rs.getString("genres").trim().toUpperCase().replace(' ', '_');
+                Genre.GenreType genre = Genre.GenreType.valueOf(genreStr);
+                Movie movie = new Movie(id, title, genre);
 
-                    matchedMovies.add(movie);
-                }
+                matchedMovies.add(movie);
             }
-
         }
         catch (SQLException e)
         {
@@ -76,28 +70,25 @@ public class SearchReview
     public static ArrayList<Review> findReviewsByMovie(String movieTitle)
     {
         ArrayList<Review> reviews = new ArrayList<>();
+        // Changed to use Database.executeQuery
         String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
-                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE LOWER(m.title) LIKE LOWER(?)";
+                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE LOWER(m.title) LIKE LOWER('%" + 
+                movieTitle.trim().toLowerCase() + "%')";
 
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql))
+        try
         {
-            statement.setString(1, "%" + movieTitle.trim().toLowerCase() + "%");
+            ResultSet rs = Database.getInstance().executeQuery(sql);
+            while (rs.next()) {
+                int reviewID = rs.getInt("reviewID");
+                String content = rs.getString("content");
+                int rating = rs.getInt("rating");
+                int userID = rs.getInt("userID");
+                int movieID = rs.getInt("movieID");
+                Date reviewDate = rs.getDate("reviewDate");
+                int likeCount = rs.getInt("likeCount");
 
-            try (ResultSet rs = statement.executeQuery())
-            {
-                while (rs.next()) {
-                    int reviewID = rs.getInt("reviewID");
-                    String content = rs.getString("content");
-                    int rating = rs.getInt("rating");
-                    int userID = rs.getInt("userID");
-                    int movieID = rs.getInt("movieID");
-                    Date reviewDate = rs.getDate("reviewDate");
-                    int likeCount = rs.getInt("likeCount");
-
-                    Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
-                    reviews.add(review);
-                }
+                Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
+                reviews.add(review);
             }
         }
         catch (SQLException e)
@@ -116,29 +107,24 @@ public class SearchReview
     public static ArrayList<Review> findReviewsByUsername(String username)
     {
         ArrayList<Review> reviews = new ArrayList<>();
-
+        // Changed to use Database.executeQuery
         String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
-                "FROM reviews r JOIN users u ON r.userID = u.userID WHERE u.username = ?";
+                "FROM reviews r JOIN users u ON r.userID = u.userID WHERE u.username = '" + username + "'";
 
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql))
+        try
         {
-            statement.setString(1, username);
+            ResultSet rs = Database.getInstance().executeQuery(sql);
+            while (rs.next()) {
+                int reviewID = rs.getInt("reviewID");
+                String content = rs.getString("content");
+                int rating = rs.getInt("rating");
+                int userID = rs.getInt("userID");
+                int movieID = rs.getInt("movieID");
+                Date reviewDate = rs.getDate("reviewDate");
+                int likeCount = rs.getInt("likeCount");
 
-            try (ResultSet rs = statement.executeQuery())
-            {
-                while (rs.next()) {
-                    int reviewID = rs.getInt("reviewID");
-                    String content = rs.getString("content");
-                    int rating = rs.getInt("rating");
-                    int userID = rs.getInt("userID");
-                    int movieID = rs.getInt("movieID");
-                    Date reviewDate = rs.getDate("reviewDate");
-                    int likeCount = rs.getInt("likeCount");
-
-                    Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
-                    reviews.add(review);
-                }
+                Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
+                reviews.add(review);
             }
         }
         catch (SQLException e)
@@ -170,29 +156,25 @@ public class SearchReview
             return null;
         }
 
+        // Changed to use Database.executeQuery
         String sql = "SELECT r.reviewID, r.content, r.rating, r.userID, r.movieID, r.reviewDate, r.likeCount " +
-                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE m.genres LIKE ?";
+                "FROM reviews r JOIN movies m ON r.movieID = m.id WHERE m.genres LIKE '%" + genreType.toString() + "%'";
 
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql))
+        try
         {
-            statement.setString(1, "%" + genreType.toString() + "%");
-
-            try (ResultSet rs = statement.executeQuery())
+            ResultSet rs = Database.getInstance().executeQuery(sql);
+            while (rs.next())
             {
-                while (rs.next())
-                {
-                    int reviewID = rs.getInt("reviewID");
-                    String content = rs.getString("content");
-                    int rating = rs.getInt("rating");
-                    int userID = rs.getInt("userID");
-                    int movieID = rs.getInt("movieID");
-                    Date reviewDate = rs.getDate("reviewDate");
-                    int likeCount = rs.getInt("likeCount");
+                int reviewID = rs.getInt("reviewID");
+                String content = rs.getString("content");
+                int rating = rs.getInt("rating");
+                int userID = rs.getInt("userID");
+                int movieID = rs.getInt("movieID");
+                Date reviewDate = rs.getDate("reviewDate");
+                int likeCount = rs.getInt("likeCount");
 
-                    Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
-                    reviews.add(review);
-                }
+                Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
+                reviews.add(review);
             }
         }
         catch (SQLException e)
@@ -212,35 +194,28 @@ public class SearchReview
     public static ArrayList<Review> findReviewsByDateRange(Date startDate, Date endDate)
     {
         ArrayList<Review> reviews = new ArrayList<>();
-        String sql = "SELECT * FROM reviews WHERE reviewDate BETWEEN ? AND ?";
-
+        // Changed to use Database.executeQuery
         Timestamp startTimestamp = new Timestamp(startDate.getTime());
         Timestamp endTimestamp = new Timestamp(endDate.getTime() + (24 * 60 * 60 * 1000) - 1);
 
-        try (Connection conn = Database.getInstance().getConnection();
-             PreparedStatement statement = conn.prepareStatement(sql))
+        String sql = "SELECT * FROM reviews WHERE reviewDate BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "'";
+
+        try
         {
-
-            statement.setTimestamp(1, startTimestamp);
-            statement.setTimestamp(2, endTimestamp);
-
-            try (ResultSet rs = statement.executeQuery())
+            ResultSet rs = Database.getInstance().executeQuery(sql);
+            while (rs.next())
             {
-                while (rs.next())
-                {
-                    int reviewID = rs.getInt("reviewID");
-                    String content = rs.getString("content");
-                    int rating = rs.getInt("rating");
-                    int userID = rs.getInt("userID");
-                    int movieID = rs.getInt("movieID");
-                    Date reviewDate = rs.getTimestamp("reviewDate");
-                    int likeCount = rs.getInt("likeCount");
+                int reviewID = rs.getInt("reviewID");
+                String content = rs.getString("content");
+                int rating = rs.getInt("rating");
+                int userID = rs.getInt("userID");
+                int movieID = rs.getInt("movieID");
+                Date reviewDate = rs.getTimestamp("reviewDate");
+                int likeCount = rs.getInt("likeCount");
 
-                    Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
-                    reviews.add(review);
-                }
+                Review review = new Review(reviewID, content, rating, userID, movieID, reviewDate, likeCount);
+                reviews.add(review);
             }
-
         }
         catch (SQLException e)
         {

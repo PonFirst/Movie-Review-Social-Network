@@ -26,19 +26,11 @@ public class Graph
         this.following = new HashMap<>();
         this.userIndex = new HashMap<>();
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        
         try {
-            // Get database connection
-            connection = Database.getInstance().getConnection();
-            
             // First, load all users from the Users table
-            statement = connection.prepareStatement(
-                "SELECT userID, username, email FROM Users"
-            );
-            resultSet = statement.executeQuery();
+            // Changed to use Database.executeQuery
+            String userQuery = "SELECT userID, username, email FROM Users";
+            ResultSet resultSet = Database.getInstance().executeQuery(userQuery);
             
             // Create and load users
             while (resultSet.next()) {
@@ -59,14 +51,11 @@ public class Graph
             
             // Close resources
             resultSet.close();
-            statement.close();
             
             // Now load all follower relationships from UserFollower table
-            statement = connection.prepareStatement(
-                "SELECT uf.userID, uf.followerID " +
-                "FROM UserFollower uf"
-            );
-            resultSet = statement.executeQuery();
+            // Changed to use Database.executeQuery
+            String followerQuery = "SELECT uf.userID, uf.followerID FROM UserFollower uf";
+            resultSet = Database.getInstance().executeQuery(followerQuery);
             
             // Add each follower relationship
             while (resultSet.next()) {
@@ -86,17 +75,7 @@ public class Graph
         } catch (SQLException e) {
             System.err.println("Error loading social graph from database: " + e.getMessage());
             e.printStackTrace();
-        } finally {
-            // Close resources in reverse order
-            try {
-                if (resultSet != null) resultSet.close();
-                if (statement != null) statement.close();
-                // Note: We typically don't close the connection here as it may be reused
-            } catch (SQLException e) {
-                System.err.println("Error closing database resources: " + e.getMessage());
-            }
         }
-
     }
     
     /**
@@ -107,17 +86,15 @@ public class Graph
         // Load genres for this user
         ArrayList<Genre.GenreType> genres = new ArrayList<>();
         try {
-            Connection connection = Database.getInstance().getConnection();
-            String genreQuery = "SELECT genre FROM UserGenres WHERE userID = ?";
-            try (PreparedStatement genreStatement = connection.prepareStatement(genreQuery)) {
-                genreStatement.setInt(1, userId);
-                ResultSet genreResultSet = genreStatement.executeQuery();
-                while (genreResultSet.next()) {
-                    try {
-                        genres.add(Genre.GenreType.valueOf(genreResultSet.getString("genre")));
-                    } catch (IllegalArgumentException e) {
-                        System.err.println("Invalid genre in database for user " + userId);
-                    }
+            // Changed to use Database.executeQuery
+            String genreQuery = "SELECT genre FROM UserGenres WHERE userID = " + userId;
+            ResultSet genreResultSet = Database.getInstance().executeQuery(genreQuery);
+            
+            while (genreResultSet.next()) {
+                try {
+                    genres.add(Genre.GenreType.valueOf(genreResultSet.getString("genre")));
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Invalid genre in database for user " + userId);
                 }
             }
         } catch (SQLException e) {
@@ -128,6 +105,8 @@ public class Graph
         // Note: We're setting password to null since we don't load it from the database
         return new User(userId, username, email, null, genres);
     }
+    
+    // Rest of the methods remain unchanged
     
     /**
      * Gets the singleton instance of the graph
@@ -420,25 +399,11 @@ public class Graph
      * It clears the existing relationships in the database and re-adds them based on the current graph state.
      */
     public void disconnect() {
-        Connection conn = null;
-        PreparedStatement deleteStatement = null;
-        PreparedStatement insertStatement = null;
-        
         try {
-            // Get database connection
-            conn = Database.getInstance().getConnection();
-            
-            // Disable auto-commit for transaction
-            conn.setAutoCommit(false);
-            
+            // Changed to use Database.executeUpdate
             // Delete existing relationships
             String deleteQuery = "DELETE FROM UserFollower";
-            deleteStatement = conn.prepareStatement(deleteQuery);
-            deleteStatement.executeUpdate();
-            
-            // Prepare insert statement
-            String insertQuery = "INSERT INTO UserFollower (userID, followerID) VALUES (?, ?)";
-            insertStatement = conn.prepareStatement(insertQuery);
+            Database.getInstance().executeUpdate(deleteQuery);
             
             // Iterate through all users in the graph
             for (Map.Entry<User, List<User>> entry : this.following.entrySet()) {
@@ -448,48 +413,17 @@ public class Graph
                 // For each user this user is following
                 for (User followedUser : followedUsers) {
                     // Insert the relationship
-                    insertStatement.setInt(1, followedUser.getUserID());  // userID (being followed)
-                    insertStatement.setInt(2, currentUser.getUserID());   // followerID
-                    insertStatement.addBatch();
+                    String insertQuery = "INSERT INTO UserFollower (userID, followerID) VALUES (" +
+                                         followedUser.getUserID() + ", " + currentUser.getUserID() + ")";
+                    Database.getInstance().executeUpdate(insertQuery);
                 }
             }
-            
-            // Execute batch insert
-            insertStatement.executeBatch();
-            
-            // Commit the transaction
-            conn.commit();
             
             System.out.println("Successfully synced graph relationships to database.");
             
         } catch (SQLException e) {
-            // Rollback in case of any error
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException rollbackEx) {
-                    System.err.println("Error during rollback: " + rollbackEx.getMessage());
-                }
-            }
-            
             System.err.println("Error syncing graph to database: " + e.getMessage());
             e.printStackTrace();
-        } finally {
-            // Restore auto-commit and close resources
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                }
-                
-                if (deleteStatement != null) {
-                    deleteStatement.close();
-                }
-                if (insertStatement != null) {
-                    insertStatement.close();
-                }
-            } catch (SQLException e) {
-                System.err.println("Error closing resources: " + e.getMessage());
-            }
         }
     }
 
