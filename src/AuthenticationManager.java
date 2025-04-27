@@ -16,7 +16,8 @@ public class AuthenticationManager
     /**
      * Private constructor to prevent multiple instances
      */
-    private AuthenticationManager(){
+    private AuthenticationManager()
+    {
     }
 
     /**
@@ -26,7 +27,8 @@ public class AuthenticationManager
      */
     public static AuthenticationManager getInstance()
     {
-        if (instance == null) {
+        if (instance == null)
+        {
             instance = new AuthenticationManager();
         }
         return instance;

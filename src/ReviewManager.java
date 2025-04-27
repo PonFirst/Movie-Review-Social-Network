@@ -15,7 +15,8 @@ public class ReviewManager
     /**
      * Private constructor
      */
-    private ReviewManager(){
+    private ReviewManager()
+    {
     }
 
     /**
@@ -64,7 +65,8 @@ public class ReviewManager
                 return null;
             }
         }
-        else {
+        else
+        {
             // Display matched movies and allow selection
             System.out.println("Matching Movies:");
             for (Movie m : matchedMovies)
@@ -230,7 +232,8 @@ public class ReviewManager
         {
             selectedReview.update();
         }
-        else {
+        else
+        {
             System.out.println("Edit canceled.");
         }
     }
