@@ -312,6 +312,7 @@ public class Graph
      * 
      * @return a formatted string showing all users with their followers and following
      */
+    /*
     @Override
     public String toString()
     {
@@ -363,6 +364,7 @@ public class Graph
         
         return sb.toString();
     }
+    */
 
     /**
      * Syncs the database with the graph structure.
