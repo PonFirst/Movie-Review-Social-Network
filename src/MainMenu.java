@@ -6,6 +6,7 @@ import java.util.Scanner;
  * It calls methods from other classes such as ReviewManager, UserGraphManager,
  * and AuthenticationManager to perform actions like writing reviews, managing follows,
  * searching for reviews, logging in, and logging out.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class MainMenu
 {
@@ -42,7 +43,6 @@ public class MainMenu
      * Displays the main menu to the user and handles the user input.
      * Delegates actions to the appropriate classes based on the menu choice.
      * Shows different options based on authentication status.
-     * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
      */
     public void displayMainMenu()
     {
