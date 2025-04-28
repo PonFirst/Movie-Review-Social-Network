@@ -82,7 +82,12 @@ public class ReviewManager
             else
             {
                 // Otherwise, prompt user to select a movie by ID
-                int selectedID = InputValidator.getValidatedInt(scanner, "Enter the Movie ID: ");
+                int selectedID = InputValidator.getValidatedInt(scanner, "Enter the Movie ID (0 to cancel): ");
+                if (selectedID == 0)
+                {
+                    System.out.println("Review process canceled.");
+                    return null;
+                }
                 for (Movie m : matchedMovies)
                 {
                     if (m.getMovieID() == selectedID)
