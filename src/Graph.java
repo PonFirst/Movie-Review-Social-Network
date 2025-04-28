@@ -77,7 +77,8 @@ public class Graph
                 }
             }
             
-        } catch (SQLException e)
+        }
+        catch (SQLException e)
         {
             System.err.println("Error loading social graph from database: " + e.getMessage());
             e.printStackTrace();
@@ -113,7 +114,8 @@ public class Graph
                     System.err.println("Invalid genre in database for user " + userId);
                 }
             }
-        } catch (SQLException e)
+        }
+        catch (SQLException e)
         {
             System.err.println("Error loading genres for user " + userId + ": " + e.getMessage());
         }

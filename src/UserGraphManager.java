@@ -86,7 +86,8 @@ public class UserGraphManager
             // Add follower relationship
             Graph.getInstance().addFollower(currentUser, userToFollow);
             System.out.println("You are now following " + userToFollow.getUserName() + ".");
-        } else
+        }
+        else
         {
             System.out.println("You chose not to follow " + userToFollow.getUserName() + ".");
         }
@@ -141,11 +142,13 @@ public class UserGraphManager
             if (unfollowSuccessful)
             {
                 System.out.println("You have unfollowed " + userToUnfollow.getUserName() + ".");
-            } else
+            }
+            else
             {
                 System.out.println("Failed to unfollow " + userToUnfollow.getUserName() + ".");
             }
-        } else
+        }
+        else
         {
             System.out.println("You chose not to unfollow " + userToUnfollow.getUserName() + ".");
         }
@@ -197,7 +200,8 @@ public class UserGraphManager
                 if (uniqueRecommendations.size() < 5)
                 {
                     uniqueRecommendations.add(user);
-                } else
+                }
+                else
                 {
                     break;
                 }
@@ -231,7 +235,8 @@ public class UserGraphManager
             if (genres.isEmpty())
             {
                 System.out.print("None specified");
-            } else
+            }
+            else
             {
                 for (int j = 0; j < genres.size(); j++)
                 {
@@ -248,7 +253,8 @@ public class UserGraphManager
                 System.out.println("   Latest Review:");
                 System.out.print("   ");
                 System.out.print(latestReview); // Using the Review's toString() method that includes truncation
-            } else
+            }
+            else
             {
                 System.out.println("   No reviews yet");
             }
@@ -293,7 +299,8 @@ public class UserGraphManager
                         {
                             likedGenres.add(part.trim());
                         }
-                    } else
+                    }
+                    else
                     {
                         likedGenres.add(genre.trim());
                     }

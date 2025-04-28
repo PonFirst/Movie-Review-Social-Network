@@ -16,7 +16,8 @@ public class SearchReview
     private static SearchReview instance;
 
     // Private constructor to prevent instantiation
-    private SearchReview() {
+    private SearchReview()
+    {
     }
 
     // Returns the singleton instance of SearchReview
