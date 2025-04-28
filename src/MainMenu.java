@@ -107,6 +107,11 @@ public class MainMenu
                 scanner.close();
                 System.exit(0);
                 break;
+            case 10:
+                // Debug option to view the social graph
+                Graph graph = Graph.getInstance();
+                System.out.println(graph);
+                break;
             default:
                 System.out.println("Invalid option. Try again.");
         }

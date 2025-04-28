@@ -7,9 +7,6 @@ A social network platform focused on movie reviews, allowing users to share, exp
 - Java Development Kit (JDK) 8 or higher
 
 ## Compilation and Execution
-Run run.sh bash script
-
-
 
 ### Unix-like Systems (Linux/macOS)
 #### Compiling
