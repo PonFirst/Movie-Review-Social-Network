@@ -233,7 +233,8 @@ public class AuthenticationManager
                     String formatted = genreStr.trim().toUpperCase().replace(' ', '_');
                     Genre.GenreType genre = Genre.GenreType.valueOf(formatted);
                     favoriteGenres.add(genre);
-                } catch (IllegalArgumentException e)
+                }
+                catch (IllegalArgumentException e)
                 {
                     System.out.println("Invalid genre: " + genreStr.trim());
                     allValid = false;
