@@ -4,9 +4,11 @@
 A social network platform focused on movie reviews, allowing users to share, explore, and interact with movie reviews.
 
 ## Prerequisites
-- Java Development Kit (JDK) 8 or higher
+Java Development Kit (JDK) 8 or higher
 
 ## Compilation and Execution
+Run run.bash
+
 
 ### Unix-like Systems (Linux/macOS)
 #### Compiling
