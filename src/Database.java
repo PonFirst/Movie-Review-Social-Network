@@ -3,6 +3,7 @@ import java.sql.*;
 /**
  * Database class handles the connection to the SQLite database.
  * It ensures a single connection is used throughout the application by using the Singleton design pattern.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class Database
 {

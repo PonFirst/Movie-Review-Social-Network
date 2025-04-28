@@ -6,6 +6,7 @@ import java.util.ArrayList;
 /**
  * AuthenticationManager handles user authentication and registration functionalities.
  * This class follows the Singleton design pattern to ensure only one instance exists.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class AuthenticationManager
 {

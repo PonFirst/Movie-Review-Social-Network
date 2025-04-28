@@ -5,6 +5,7 @@ import java.util.Scanner;
  * The Movie class represents a movie with attributes such as ID, title, and genre.
  * It provides methods to manage movie data, including creating new movies, retrieving average ratings,
  * and interacting with the database to store and query movie information.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class Movie
 {

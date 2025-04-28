@@ -5,6 +5,7 @@ import java.sql.*;
  * A social network graph implementation using HashMaps to store user relationships.
  * Optimized for follower/following relationships between users.
  * Implements the Singleton pattern to ensure only one graph instance exists.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class Graph
 {

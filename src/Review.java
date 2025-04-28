@@ -8,6 +8,7 @@ import java.sql.*;
  * The Review class represents a movie review with attributes such as content, rating, 
  * and associated user and movie information. It provides methods to manage review data,
  * including saving, updating, deleting, and liking reviews in the database.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class Review
 {

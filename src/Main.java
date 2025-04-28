@@ -1,6 +1,7 @@
 /**
  * Main class contains the entry point of the application.
  * It initializes the main menu and starts the application loop.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class Main
 {

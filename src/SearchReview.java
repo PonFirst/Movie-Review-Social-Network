@@ -8,6 +8,7 @@ import java.util.Scanner;
  * SearchReview class handles searching and displaying movie reviews based on different criteria.
  * It provides methods to search reviews by movie title, genre, username, and date range.
  * The class utilizes the Singleton pattern and interacts with the database to get reviews.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class SearchReview
 {

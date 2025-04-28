@@ -7,6 +7,7 @@ import java.util.Scanner;
  * and liking reviews. It provides functionality for users to interact with their movie reviews.
  * The class uses singleton design pattern to ensure a single instance is used throughout the
  * application.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class ReviewManager
 {

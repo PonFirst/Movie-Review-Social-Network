@@ -6,6 +6,7 @@ import java.util.Objects;
  * The User class represents a user in the system with attributes like ID, username, email,
  * password, and favorite genres. It provides methods to manage user data and interact with
  * the database.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class User
 {

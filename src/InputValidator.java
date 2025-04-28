@@ -6,6 +6,7 @@ import java.util.Scanner;
 /**
  * InputValidator class provides utility methods to validate user input.
  * It handles various input types such as integers, emails, dates, and boolean confirmation.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class InputValidator
 {

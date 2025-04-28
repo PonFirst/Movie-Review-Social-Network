@@ -42,6 +42,7 @@ public class MainMenu
      * Displays the main menu to the user and handles the user input.
      * Delegates actions to the appropriate classes based on the menu choice.
      * Shows different options based on authentication status.
+     * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
      */
     public void displayMainMenu()
     {
@@ -97,11 +98,11 @@ public class MainMenu
                 Graph.getInstance().disconnect();
                 try
                 {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e)
                 {
                     System.out.println("Thread was interrupted: " + e.getMessage());
-                    Thread.currentThread().interrupt(); // Restore interrupted status
+                    Thread.currentThread().interrupt();
                 }
                 Database.getInstance().disconnect();
                 scanner.close();

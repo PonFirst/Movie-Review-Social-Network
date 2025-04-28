@@ -10,6 +10,7 @@ import java.util.Set;
  * UserGraphManager handles all social network operations between users including following,
  * unfollowing, and suggesting new users to follow. It uses the Graph class to maintain
  * relationship data and implements the Singleton pattern.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class UserGraphManager
 {

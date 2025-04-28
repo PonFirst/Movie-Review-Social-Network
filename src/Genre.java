@@ -1,6 +1,7 @@
 /**
  * Genre class defines an enum of different movie genres.
  * This provides a standardized set of genres that can be used throughout the application.
+ * Authors: Phakin Dhamsirimongkol, Pon Yimcharoen
  */
 public class Genre
 {
